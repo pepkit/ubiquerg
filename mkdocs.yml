@@ -1,0 +1,22 @@
+site_name: Ubiquerg
+site_url: http://code.databio.org/ubiquerg/
+repo_url: http://github.com/pepkit/ubiquerg
+
+nav:
+  - Introduction:
+    - Home: README.md
+  - Reference:
+    - API: autodoc_build/ubiquerg.md
+    - Support: support.md
+    - Contributing: contributing.md
+    - Changelog: changelog.md
+
+theme: databio
+
+plugins:
+  - databio:
+      autodoc_build: "docs/autodoc_build"
+      autodoc_package: "ubiquerg"
+      no_top_level: true
+  - search
+
