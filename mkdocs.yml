@@ -1,6 +1,7 @@
 site_name: Ubiquerg
 site_url: http://code.databio.org/ubiquerg/
 repo_url: http://github.com/pepkit/ubiquerg
+pypi_name: ubiquerg
 
 nav:
   - Introduction:
