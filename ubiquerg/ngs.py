@@ -11,38 +11,6 @@ __email__ = "vreuter@virginia.edu"
 PeekBamResult = namedtuple("PeekBamResult", ["read_lengths", "paired"])
 
 
-def peek_read_lengths_and_paired_counts_from_bam(bam, sample_size):
-    """
-    Counting read lengths and paired reads in a sample from a BAM.
-
-    :param str bam: path to BAM file to examine
-    :param int sample_size: number of reads to look at for estimation
-    :return defaultdict[int, int], int: read length observation counts, and
-        number of paired reads observed
-    :raise OSError:
-    """
-    try:
-        p = subprocess.Popen(['samtools', 'view', bam], stdout=subprocess.PIPE)
-        # Count paired alignments
-        paired = 0
-        read_lengths = defaultdict(int)
-        for _ in range(sample_size):
-            line = p.stdout.readline().decode().split("\t")
-            flag = int(line[1])
-            read_lengths[len(line[9])] += 1
-            if 1 & flag:  # check decimal flag contains 1 (paired)
-                paired += 1
-        p.kill()
-    except OSError:
-        reason = "Note (samtools not in path): For NGS inputs, " \
-                 "pep needs samtools to auto-populate " \
-                 "'read_length' and 'read_type' attributes; " \
-                 "these attributes were not populated."
-        raise OSError(reason)
-
-    return PeekBamResult(read_lengths, paired)
-
-
 def count_fail_reads(file_name, paired_end, prog_path):
     """
     Count the number of reads that failed platform/vendor quality checks.
@@ -205,6 +173,38 @@ def is_unzipped_fastq(file_name):
     """
     _, ext = os.path.splitext(file_name)
     return ext in [".fastq", ".fq"]
+
+
+def peek_read_lengths_and_paired_counts_from_bam(bam, sample_size):
+    """
+    Counting read lengths and paired reads in a sample from a BAM.
+
+    :param str bam: path to BAM file to examine
+    :param int sample_size: number of reads to look at for estimation
+    :return defaultdict[int, int], int: read length observation counts, and
+        number of paired reads observed
+    :raise OSError:
+    """
+    try:
+        p = subprocess.Popen(['samtools', 'view', bam], stdout=subprocess.PIPE)
+        # Count paired alignments
+        paired = 0
+        read_lengths = defaultdict(int)
+        for _ in range(sample_size):
+            line = p.stdout.readline().decode().split("\t")
+            flag = int(line[1])
+            read_lengths[len(line[9])] += 1
+            if 1 & flag:  # check decimal flag contains 1 (paired)
+                paired += 1
+        p.kill()
+    except OSError:
+        reason = "Note (samtools not in path): For NGS inputs, " \
+                 "pep needs samtools to auto-populate " \
+                 "'read_length' and 'read_type' attributes; " \
+                 "these attributes were not populated."
+        raise OSError(reason)
+
+    return PeekBamResult(read_lengths, paired)
 
 
 def samtools_view(file_name, param, prog_path, postpend=""):
