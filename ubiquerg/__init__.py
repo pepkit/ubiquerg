@@ -1,3 +1,3 @@
 """ Package exports """
 from .collection import *
-from .ngs import *
+from ._version import __version__
