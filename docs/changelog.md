@@ -3,6 +3,7 @@
 ## [0.0.3] - 2019-05-02
 ### Added
 - CLI optarg string builder (`build_cli_extra`)
+- `powerset` (all subsets of a collection)
 
 ## [0.0.2] - 2019-05-01
 ## Changed

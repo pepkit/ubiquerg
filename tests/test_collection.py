@@ -1,5 +1,7 @@
 """ Tests for collection utilities """
 
+from collections import OrderedDict
+import inspect
 import random
 import string
 import sys
@@ -8,6 +10,36 @@ from ubiquerg.collection import *
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
+
+
+def get_default_parameters(func, pred=None):
+    """
+    For given function, get mapping from parameter name to default value.
+
+    :param callable func: the function to inspect
+    :param func(object, object) -> bool pred: how to determine whether the
+        parameter should be included, based on name and default value
+    :return OrderedDict[str, object]]: mapping from parameter name to default value
+    """
+    if not callable(func):
+        raise TypeError("Not a callable: {} ({})".format(func.__name__, type(func)))
+    spec = inspect.getfullargspec(func)
+    par_arg_pairs = zip(spec.args[(len(spec.args) - len(spec.defaults)):],
+                        spec.defaults)
+    return OrderedDict(
+        par_arg_pairs if pred is None else
+        [(p, a) for p, a in par_arg_pairs if pred(p, a)])
+
+
+POWERSET_BOOL_KWARGSPACE = {
+    p: [False, True] for p in
+    get_default_parameters(powerset, lambda _, v: isinstance(v, bool))}
+
+
+def pytest_generate_tests(metafunc):
+    """ Test case generation and parameterization for this module """
+    if "arbwrap" in metafunc.fixturenames:
+        metafunc.parametrize("arbwrap", [list, tuple, set, iter])
 
 
 def randcoll(pool, dt):
@@ -38,6 +70,30 @@ def randcoll(pool, dt):
      (randcoll([int(d) for d in string.digits], set), True),
      ("", False), ("abc", False)]
 )
-def test_coll_like(arg, exp):
+def test_is_collection_like(arg, exp):
     """ Test arbiter of whether an object is collection-like. """
     assert exp == is_collection_like(arg)
+
+
+@pytest.mark.skip("not implemented")
+@pytest.mark.parametrize("kwargs", [])
+def test_powerset_of_empty_pool(arbwrap, kwargs):
+    assert [] == powerset(arbwrap([]), **kwargs)
+
+
+@pytest.mark.skip("not implemented")
+def test_powerset_fewer_items_than_min(pool, arbwrap, kwargs):
+    assert [] == powerset(arbwrap(pool), **kwargs)
+
+
+@pytest.mark.skip("not implemented")
+@pytest.mark.parametrize(["pool", "kwargs", "expected"], [])
+def test_powerset_legitimate_input(arbwrap, pool, kwargs, expected):
+    observed = powerset(arbwrap(pool), **kwargs)
+    assert len(expected) == len(observed)
+    assert expected == set(observed)
+
+
+@pytest.mark.skip("not implemented")
+def test_powerset_illegal_input(arbwrap):
+    pass
