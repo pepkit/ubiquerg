@@ -35,7 +35,8 @@ def randcoll(pool, dt):
      (randcoll(string.ascii_letters, list), True),
      (randcoll(string.ascii_letters, dict), True),
      (randcoll([int(d) for d in string.digits], tuple), True),
-     (randcoll([int(d) for d in string.digits], set), True)]
+     (randcoll([int(d) for d in string.digits], set), True),
+     ("", False), ("abc", False)]
 )
 def test_coll_like(arg, exp):
     """ Test arbiter of whether an object is collection-like. """

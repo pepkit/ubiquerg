@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.0.3] - 2019-05-02
 ### Added
 - CLI optarg string builder (`build_cli_extra`)
 

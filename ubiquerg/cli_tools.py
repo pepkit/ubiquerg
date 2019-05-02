@@ -24,7 +24,7 @@ def build_cli_extra(**kwargs):
         if v is None:
             return k
         if is_collection_like(v):
-            return " ".join(map(str, v))
-        return str(v)
+            v = " ".join(map(str, v))
+        return "{} {}".format(k, v)
 
     return " ".join(render(*kv) for kv in kwargs.items())
