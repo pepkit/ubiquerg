@@ -1,7 +1,11 @@
 """ Tests for collection utilities """
 
 from collections import OrderedDict
-import inspect
+import sys
+if sys.version_info.major < 3:
+    from inspect import getargspec as get_fun_sig
+else:
+    from inspect import getfullargspec as get_fun_sig
 import random
 import string
 import sys
@@ -23,7 +27,7 @@ def get_default_parameters(func, pred=None):
     """
     if not callable(func):
         raise TypeError("Not a callable: {} ({})".format(func.__name__, type(func)))
-    spec = inspect.getfullargspec(func)
+    spec = get_fun_sig(func)
     par_arg_pairs = zip(spec.args[(len(spec.args) - len(spec.defaults)):],
                         spec.defaults)
     return OrderedDict(
