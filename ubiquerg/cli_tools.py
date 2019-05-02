@@ -5,6 +5,8 @@ from .collection import is_collection_like
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
+__all__ = ["build_cli_extra"]
+
 
 def build_cli_extra(**kwargs):
     """
