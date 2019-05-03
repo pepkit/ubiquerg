@@ -17,6 +17,9 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
+MIN_SIZE_KWARG = "min_size"
+
+
 def combo_space(ks, items):
     """
     Create the Cartesian product of values sets, each bound to a key.
@@ -185,7 +188,20 @@ def test_powerset_legitimate_input(arbwrap, pool, kwargs, expected):
     assert [] == missed, "{} missed subsets: {}".format(len(missed), missed)
 
 
-@pytest.mark.skip("not implemented")
-def test_powerset_illegal_input(arbwrap):
+@pytest.mark.parametrize(
+    ["kwargs", "exp_err"],
+    [({"min_items": 0, "nonempty": True}, ValueError),
+     ({"min_items": -1, "nonempty": True}, ValueError),
+     ({"min_items": -sys.maxsize, "nonempty": True}, ValueError),
+     ({"min_items": "1"}, TypeError),
+     ({"min_items": "None"}, TypeError),
+     ({"min_items": [2]}, TypeError)])
+@pytest.mark.parametrize("pool", [string.ascii_letters, range(-10, 11)])
+def test_powerset_illegal_input(arbwrap, kwargs, exp_err, pool):
     """ Invalid argument combination to powerset parameters is exceptional. """
-    pass
+    invalid_kwargs = set(kwargs.keys()) - set(get_fun_sig(powerset).args)
+    assert not invalid_kwargs, \
+        "Attempting to use keyword arguments not in the signature of {}: {}".\
+        format(powerset.__name__, ", ".join(invalid_kwargs))
+    with pytest.raises(exp_err):
+        powerset(arbwrap(pool), **kwargs)
