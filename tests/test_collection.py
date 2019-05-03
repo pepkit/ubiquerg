@@ -1,6 +1,6 @@
 """ Tests for collection utilities """
 
-from collections import OrderedDict
+from collections import Counter, OrderedDict
 import itertools
 import sys
 if sys.version_info.major < 3:
@@ -142,13 +142,47 @@ def test_powerset_fewer_items_than_min(arbwrap, min_items, pool, include_full_po
                           include_full_pop=include_full_pop)
 
 
-@pytest.mark.skip("not implemented")
-@pytest.mark.parametrize(["pool", "kwargs", "expected"], [])
+@pytest.mark.parametrize("pool", [[1, 2, 3], ["a", "b", "c"]])
+def test_full_powerset(arbwrap, pool):
+    obs = powerset(arbwrap(pool))
+    reps = list(filter(lambda kv: kv[1] > 1, Counter(obs).items()))
+    assert [] == reps, "Repeated items in powerset: {}".format(reps)
+    assert 2 ** len(pool) == len(obs)
+
+
+@pytest.mark.parametrize(
+    ["pool", "kwargs", "expected"], [
+        ([-1, 1], {}, [set(), {-1}, {1}, {-1, 1}]),
+        ([-1, 1], {"include_full_pop": False}, [set(), {-1}, {1}]),
+        ([-1, 1], {"nonempty": True}, [{-1}, {1}, {-1, 1}]),
+        ([-1, 1], {"include_full_pop": False, "nonempty": True}, [{-1}, {1}])
+    ])
 def test_powerset_legitimate_input(arbwrap, pool, kwargs, expected):
     """ Powerset behavior responds to arguments to its parameters """
-    observed = powerset(arbwrap(pool), **kwargs)
-    assert len(expected) == len(observed)
-    assert expected == set(observed)
+
+    # Verification logic type dependencies
+    assert isinstance(expected, list)
+    assert all(isinstance(ss, set) for ss in expected)
+
+    observed = powerset(arbwrap(pool), **kwargs)    # Find the powerset.
+
+    # Check for repeats.
+    reps = list(filter(lambda kv: kv[1] > 1, Counter(observed).items()))
+    assert [] == reps, "Repeated items in powerset: {}".format(reps)
+    assert len(expected) == len(observed)    # Dumbest check is on raw size.
+
+    # Better, harder check is on mutual inclusion.
+    # With no repeats in the empirical powerset and expected size validated
+    # as equal to observe size, to verify bijection we check for all "hits."
+    exp_hits = [False] * len(expected)
+    for sub in observed:
+        sought = set(sub)
+        for i, exp in enumerate(expected):
+            if sought == exp:
+                exp_hits[i] = True
+                break
+    missed = [ss for ss, hit in zip(expected, exp_hits) if not hit]
+    assert [] == missed, "{} missed subsets: {}".format(len(missed), missed)
 
 
 @pytest.mark.skip("not implemented")
