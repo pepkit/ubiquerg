@@ -1,6 +1,8 @@
 # Changelog
 
-## [Unreleased]
+## [0.0.4] - 2019-05-03
+### Added
+- `ExpectContext` for uniform test execution, regardless of whether expectation is an ordinary object or an exception
 ### Changed
 - When minimum item count exceeds pool size and/or the "pool" of items is empty, `powerset` returns an empty collection rather than a collection with a single empty element.
 
