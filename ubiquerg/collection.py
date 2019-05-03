@@ -50,7 +50,12 @@ def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
         if nonempty and min_items < 1:
             raise ValueError("When minimum item count is {}, nonempty subsets "
                              "cannot be guaranteed.".format(min_items))
-    items = list(items)    # Account for iterable burn possibility.
+    # Account for iterable burn possibility; besides, collection should be
+    # relatively small if building the powerset.
+    items = list(items)
+    n = len(items)
+    if n == 0 or n < min_items:
+        return []
     max_items = len(items) + 1 if include_full_pop else len(items)
     return list(itertools.chain.from_iterable(
             itertools.combinations(items, k)

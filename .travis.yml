@@ -10,7 +10,7 @@ install:
   - pip install .
   - pip install -r requirements/requirements-dev.txt
   - pip install -r requirements/requirements-test.txt
-script: pytest --cov=ubiquerg
+script: pytest --cov=ubiquerg --cov-report term-missing
 after_success:
   - coveralls
 branches:
