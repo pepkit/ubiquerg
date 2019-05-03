@@ -1,6 +1,7 @@
 """ Tests for collection utilities """
 
 from collections import OrderedDict
+import itertools
 import sys
 if sys.version_info.major < 3:
     from inspect import getargspec as get_fun_sig
@@ -14,6 +15,19 @@ from ubiquerg.collection import *
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
+
+
+def combo_space(ks, items):
+    """
+    Create the Cartesian product of values sets, each bound to a key.
+
+    :param Iterable[str] ks: subset of keys from the mapping items
+    :param Mapping[str, Iterable[object]] items: bindings between key and
+        collection of values
+    :return itertools.product: Cartesian product of the values sets bound by
+        the given subset of keys
+    """
+    return itertools.product(*[items[k] for k in ks])
 
 
 def get_default_parameters(func, pred=None):
@@ -35,9 +49,37 @@ def get_default_parameters(func, pred=None):
         [(p, a) for p, a in par_arg_pairs if pred(p, a)])
 
 
+def _generate_too_few_items(minsize, maxsize, pool):
+    """
+    Generate a "pool" of items of random size guaranteed less than given bound.
+
+    :param int minsize: minimum pool size
+    :param int maxsize: maximum pool size
+    :param Iterable[object] pool: items from which to pull a subset for the
+        returned pool
+    :return Iterable[object]: subset of initial pool, constrained to be
+        sufficiently small in accordance with given bounds
+    :raise TypeError: if either size bound is not an integer
+    :raise ValueError: if maxsize < minsize
+    """
+    print_bound = lambda: "[{}, {}]".format(minsize, maxsize)
+    if not (isinstance(minsize, int) and isinstance(maxsize, int)):
+        raise TypeError("Size bounds must be integers; got {}".
+                        format(print_bound()))
+    if maxsize < minsize:
+        raise ValueError("Nonesense size bounds: {}".format(print_bound()))
+    n = random.randint(minsize, maxsize)
+    return n, random.sample(pool, max(n - 1, 0))
+
+
 POWERSET_BOOL_KWARGSPACE = {
     p: [False, True] for p in
     get_default_parameters(powerset, lambda _, v: isinstance(v, bool))}
+KWARGSPACE_POWERSET = {
+    ks: combo_space(ks, POWERSET_BOOL_KWARGSPACE)
+    for n in range(len(POWERSET_BOOL_KWARGSPACE) + 1)
+    for ks in [tuple(c) for c in
+               itertools.combinations(POWERSET_BOOL_KWARGSPACE.keys(), n)]}
 
 
 def pytest_generate_tests(metafunc):
@@ -79,20 +121,31 @@ def test_is_collection_like(arg, exp):
     assert exp == is_collection_like(arg)
 
 
-@pytest.mark.skip("not implemented")
-@pytest.mark.parametrize("kwargs", [])
+@pytest.mark.parametrize("kwargs",
+    [d for ks, vals_list in KWARGSPACE_POWERSET.items()
+     for d in [dict(zip(ks, vs)) for vs in vals_list]])
 def test_powerset_of_empty_pool(arbwrap, kwargs):
+    """ Empty collection's powerset is always empty. """
     assert [] == powerset(arbwrap([]), **kwargs)
 
 
-@pytest.mark.skip("not implemented")
-def test_powerset_fewer_items_than_min(pool, arbwrap, kwargs):
-    assert [] == powerset(arbwrap(pool), **kwargs)
+@pytest.mark.parametrize("include_full_pop", [False, True])
+@pytest.mark.parametrize(
+    ["min_items", "pool"],
+    [_generate_too_few_items(
+        2, 10, list(string.ascii_letters) + list(range(-10, 11)))
+     for _ in range(5)])
+def test_powerset_fewer_items_than_min(arbwrap, min_items, pool, include_full_pop):
+    """ Minimum item count in excess of pool size results in empty powerset. """
+    print("pool (n={}): {}".format(len(pool), pool))
+    assert [] == powerset(arbwrap(pool), min_items=min_items,
+                          include_full_pop=include_full_pop)
 
 
 @pytest.mark.skip("not implemented")
 @pytest.mark.parametrize(["pool", "kwargs", "expected"], [])
 def test_powerset_legitimate_input(arbwrap, pool, kwargs, expected):
+    """ Powerset behavior responds to arguments to its parameters """
     observed = powerset(arbwrap(pool), **kwargs)
     assert len(expected) == len(observed)
     assert expected == set(observed)
@@ -100,4 +153,5 @@ def test_powerset_legitimate_input(arbwrap, pool, kwargs, expected):
 
 @pytest.mark.skip("not implemented")
 def test_powerset_illegal_input(arbwrap):
+    """ Invalid argument combination to powerset parameters is exceptional. """
     pass
