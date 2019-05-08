@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1] - 2019-05-08
+### Changed
+- Remove `ExpectContext`; see [`veracitools`](https://github.com/pepkit/veracitools)
+
+## [0.0.5.1] - 2019-05-08
+### Fixed
+- Control exports to fix a docs build issue; see [Issue 2](https://github.com/pepkit/ubiquerg/issues/2)
+
 ## [0.0.5] - 2019-05-08
 ### Added
 - `expandpath` utility for dealing with user and environment variables in paths
