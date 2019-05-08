@@ -5,6 +5,8 @@ import pytest
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
+__all__ = ["ExpectContext"]
+
 
 class ExpectContext(object):
     """ Pytest validation context, a framework for varied kinds of expectations. """
