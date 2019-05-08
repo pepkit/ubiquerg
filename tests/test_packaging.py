@@ -9,7 +9,7 @@ __email__ = "vreuter@virginia.edu"
 @pytest.mark.parametrize(
     ["obj_name", "typecheck"],
     [("build_cli_extra", callable), ("is_collection_like", callable),
-     ("powerset", callable),
+     ("powerset", callable), ("expandpath", callable),
      ("ExpectContext", lambda obj: isinstance(obj, type))])
 def test_top_level_exports(obj_name, typecheck):
     """ At package level, validate object availability and type. """
