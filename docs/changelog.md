@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.0.5] - 2019-05-08
+### Added
+- `expandpath` utility for dealing with user and environment variables in paths
+
 ## [0.0.4] - 2019-05-03
 ### Added
 - `ExpectContext` for uniform test execution, regardless of whether expectation is an ordinary object or an exception
