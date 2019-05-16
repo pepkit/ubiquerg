@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.1] - 2019-05-16
+### Changed
+- Use `is_url` to determine slash behavior in `expandpath`
+
 ## [0.2] - 2019-05-16
 ### Added
 - `is_url`
