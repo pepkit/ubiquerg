@@ -10,6 +10,8 @@ else:
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
+__all__ = ["is_url"]
+
 
 def is_url(maybe_url):
     """
