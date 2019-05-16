@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2] - 2019-05-16
+### Added
+- `is_url`
+
 ## [0.1] - 2019-05-08
 ### Changed
 - Remove `ExpectContext`; see [`veracitools`](https://github.com/pepkit/veracitools)
