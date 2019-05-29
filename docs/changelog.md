@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.3] - 2019-05-29
+### Added
+- `TmpEnv`: environment variable context manager
+
 ## [0.2.1] - 2019-05-16
 ### Changed
 - Use `is_url` to determine slash behavior in `expandpath`
