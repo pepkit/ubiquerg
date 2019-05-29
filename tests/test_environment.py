@@ -22,6 +22,7 @@ def test_overwrite_prohibited(envvars):
     {"DUMMYTESTVAR": "random", "TOTALLY_RAD_VARIABLE": "ephemeral"}
 ])
 def test_overwrite_allowed(envvars):
+    """ Verify that overwriting existing value with different one works if permitted. """
     check_unset(envvars)
     with TmpEnv(**envvars):
         modified = {k: v + "_EXTRA" for k, v in envvars.items()}
@@ -37,6 +38,7 @@ def test_overwrite_allowed(envvars):
     {"DUMMYTESTVAR": "random", "TOTALLY_RAD_VARIABLE": "ephemeral"}
 ])
 def test_no_intersection(overwrite, envvars):
+    """ Verify that overwrite permission is irrelevant if no variable name collision occurs. """
     check_unset(envvars)
     with TmpEnv(overwrite=overwrite, **envvars):
         for k, v in envvars.items():
