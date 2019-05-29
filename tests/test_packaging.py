@@ -1,6 +1,7 @@
 """ Validate what's available directly on the top-level import. """
 
 import pytest
+from inspect import isclass
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -8,8 +9,9 @@ __email__ = "vreuter@virginia.edu"
 
 @pytest.mark.parametrize(
     ["obj_name", "typecheck"],
-    [("build_cli_extra", callable), ("is_collection_like", callable),
-     ("powerset", callable), ("expandpath", callable)])
+    [("build_cli_extra", callable),  ("expandpath", callable),
+     ("is_collection_like", callable), ("powerset", callable),
+     ("TmpEnv", isclass)])
 def test_top_level_exports(obj_name, typecheck):
     """ At package level, validate object availability and type. """
     import ubiquerg
