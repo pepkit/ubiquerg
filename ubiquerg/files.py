@@ -1,5 +1,7 @@
 """ Functions facilitating file operations """
 
+from hashlib import md5
+
 def checksum(path, blocksize=int(2e+9)):
     """
     Generates a md5 checksum for the file contents in the provided path
