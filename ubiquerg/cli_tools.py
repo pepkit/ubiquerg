@@ -1,7 +1,6 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like
-from sys.stdout import write
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -64,11 +63,11 @@ def query_yes_no(question, default="no"):
         raise ValueError("invalid default answer: '%s'" % default)
 
     while True:
-        write(question + prompt)
+        sys.stdout.write(question + prompt)
         choice = raw_input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
             return valid[choice]
         else:
-            write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+            sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
