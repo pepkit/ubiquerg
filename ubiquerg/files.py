@@ -2,6 +2,9 @@
 
 from hashlib import md5
 
+__all__ = ["checksum"]
+
+
 def checksum(path, blocksize=int(2e+9)):
     """
     Generates a md5 checksum for the file contents in the provided path
