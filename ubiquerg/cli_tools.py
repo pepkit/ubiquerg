@@ -1,6 +1,7 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like
+import sys
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
