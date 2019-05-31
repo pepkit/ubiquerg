@@ -63,6 +63,10 @@ def query_yes_no(question, default="no"):
     while True:
         sys.stdout.write(msg)
         try:
-            return parse(input() or default)
+            return parse(_read_from_user() or default)
         except KeyError:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+
+
+def _read_from_user():
+    return input()

@@ -2,16 +2,12 @@
 
 import itertools
 import mock
-import sys
-if sys.version_info.major < 3:
-    import __builtin__ as stdlib
-    NAME_INPUT_FUNC = "raw_input"
-else:
-    NAME_INPUT_FUNC = "input"
-    import builtins as stdlib
 
 import pytest
 from ubiquerg import query_yes_no
+
+
+READ_INPUT_PATH = "ubiquerg.cli_tools._read_from_user"
 
 
 def pytest_generate_tests(metafunc):
@@ -29,9 +25,9 @@ def test_illegal_default_yields_value_error(question, default):
 
 
 @pytest.mark.parametrize(["default", "expected"], [("no", False), ("yes", True)])
-def test_query_yesno_empty_with_default(question, default, expected):
+def test_query_yesno_empty_with_default(question, default, expected, capsys):
     """ Default response is used when user input is empty. """
-    with mock.patch.object(stdlib, NAME_INPUT_FUNC, lambda: ""):
+    with mock.patch(READ_INPUT_PATH, return_value=""):
         assert expected is query_yes_no(question, default)
 
 
@@ -42,7 +38,7 @@ def test_query_yesno_empty_with_default(question, default, expected):
     ("yes", ["invalid", "no"], False)])
 def test_response_sequence(question, default, responses, expected):
     """ The interaction re-prompts and then responds as intended. """
-    with mock.patch.object(stdlib, NAME_INPUT_FUNC, side_effect=responses):
+    with mock.patch(READ_INPUT_PATH, side_effect=responses):
         assert expected is query_yes_no(question, default)
 
 
@@ -52,5 +48,5 @@ def test_response_sequence(question, default, responses, expected):
     {True: ("yes", "ye", "y"), False: ("no", "n")}.items() for ans in resps]))
 def test_query_yesno_input(question, default, response, expected):
     """ Yes/No interaction responds to user input. """
-    with mock.patch.object(stdlib, NAME_INPUT_FUNC, lambda: response):
+    with mock.patch(READ_INPUT_PATH, return_value=response):
         assert query_yes_no(question, default) is expected
