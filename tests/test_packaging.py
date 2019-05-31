@@ -1,7 +1,7 @@
 """ Validate what's available directly on the top-level import. """
 
 import pytest
-from inspect import isclass
+from inspect import isclass, isfunction
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -9,8 +9,9 @@ __email__ = "vreuter@virginia.edu"
 
 @pytest.mark.parametrize(
     ["obj_name", "typecheck"],
-    [("build_cli_extra", callable),  ("expandpath", callable),
-     ("is_collection_like", callable), ("powerset", callable),
+    [("build_cli_extra", isfunction), ("checksum", isfunction),
+     ("expandpath", isfunction), ("is_collection_like", isfunction),
+     ("powerset", isfunction), ("query_yes_no", isfunction),
      ("TmpEnv", isclass)])
 def test_top_level_exports(obj_name, typecheck):
     """ At package level, validate object availability and type. """
