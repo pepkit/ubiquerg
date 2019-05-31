@@ -1,11 +1,14 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like
+import sys
+if sys.version_info.major < 3:
+    from __builtin__ import raw_input as input
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
-__all__ = ["build_cli_extra"]
+__all__ = ["build_cli_extra", "query_yes_no"]
 
 
 def build_cli_extra(optargs):
@@ -39,3 +42,31 @@ def build_cli_extra(optargs):
         data_iter = optargs
 
     return " ".join(render(*kv) for kv in data_iter)
+
+
+def query_yes_no(question, default="no"):
+    """
+    Ask a yes/no question via raw_input() and return their answer.
+
+    :param str question: a string that is presented to the user.
+    :param str default: the presumed answer if the user just hits <Enter>.
+    :return bool: True for "yes" or False for "no"
+    """
+    def parse(ans):
+        return {"yes": True, "y": True, "ye": True, "no": False, "n": False}[ans.lower()]
+    try:
+        prompt = {None: "[y/n]", "yes": "[Y/n]",
+                  "no": "[y/N]"}[None if default is None else default.lower()]
+    except (AttributeError, KeyError):
+        raise ValueError("invalid default answer: {}".format(default))
+    msg = "{q} {p} ".format(q=question, p=prompt)
+    while True:
+        sys.stdout.write(msg)
+        try:
+            return parse(_read_from_user() or default)
+        except KeyError:
+            sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+
+
+def _read_from_user():
+    return input()

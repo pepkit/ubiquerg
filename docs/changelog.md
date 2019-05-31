@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.4] - 2019-05-31
+### Added
+- `checksum`, using md5
+- `query_yes_no` to facilitate binary user terminal interaction
+
 ## [0.3] - 2019-05-29
 ### Added
 - `TmpEnv`: environment variable context manager
