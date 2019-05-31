@@ -2,6 +2,8 @@
 
 from .collection import is_collection_like
 import sys
+if sys.version_info.major < 3:
+    from builtins import raw_input as input
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -45,30 +47,22 @@ def build_cli_extra(optargs):
 def query_yes_no(question, default="no"):
     """
     Ask a yes/no question via raw_input() and return their answer.
-    "question" is a string that is presented to the user.
-    "default" is the presumed answer if the user just hits <Enter>.
-        It must be "yes" (the default), "no" or None (meaning
-        an answer is required of the user).
-    The "answer" return value is True for "yes" or False for "no".
-    """
-    valid = {
-        "yes": True, "y": True, "ye": True,
-        "no": False, "n": False}
-    if default is None:
-        prompt = " [y/n] "
-    elif default == "yes":
-        prompt = " [Y/n] "
-    elif default == "no":
-        prompt = " [y/N] "
-    else:
-        raise ValueError("invalid default answer: '%s'" % default)
 
+    :param str question: a string that is presented to the user.
+    :param str default: the presumed answer if the user just hits <Enter>.
+    :return bool: True for "yes" or False for "no"
+    """
+    def parse(ans):
+        return {"yes": True, "y": True, "ye": True, "no": False, "n": False}[ans.lower()]
+    try:
+        prompt = {None: "[y/n]", "yes": "[Y/n]",
+                  "no": "[y/N]"}[None if default is None else default.lower()]
+    except (AttributeError, KeyError):
+        raise ValueError("invalid default answer: {}".format(default))
+    msg = "{q} {p} ".format(q=question, p=prompt)
     while True:
-        sys.stdout.write(question + prompt)
-        choice = raw_input().lower()
-        if default is not None and choice == '':
-            return valid[default]
-        elif choice in valid:
-            return valid[choice]
-        else:
+        sys.stdout.write(msg)
+        try:
+            return parse(input() or default)
+        except KeyError:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
