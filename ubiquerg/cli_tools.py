@@ -2,8 +2,6 @@
 
 from .collection import is_collection_like
 import sys
-if sys.version_info.major < 3:
-    from __builtin__ import raw_input as input
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -69,4 +67,8 @@ def query_yes_no(question, default="no"):
 
 
 def _read_from_user():
+    import sys
+    if sys.version_info.major < 3:
+        from __builtin__ import raw_input
+        return raw_input()
     return input()
