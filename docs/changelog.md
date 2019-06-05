@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Fixed
+- More robust handling of terminal interaction in `query_yes_no`
+
 ## [0.4] - 2019-05-31
 ### Added
 - `checksum`, using md5
