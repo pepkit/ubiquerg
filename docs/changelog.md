@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.3] - 2019-06-06
+### Changed
+- To avoid implicitly wrapping `input()` in `eval`, never use `2to3`.
+
 ## [0.4.2] - 2019-06-06
 ### Fixed
 - More robust handling of terminal interaction in `query_yes_no`
