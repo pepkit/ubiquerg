@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## [0.4.2] - 2019-06-06
 ### Fixed
 - More robust handling of terminal interaction in `query_yes_no`
 
