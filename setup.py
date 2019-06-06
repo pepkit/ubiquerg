@@ -12,8 +12,6 @@ def read_reqs(reqs_name):
         return [l.strip() for l in f if l.strip()]
 
 
-extra = {"use_2to3": True} if sys.version_info >= (3, ) else {}
-
 with open(os.path.join(PKG, "_version.py"), 'r') as versionfile:
     version = versionfile.readline().split()[-1].strip("\"'\n")
 
@@ -49,5 +47,4 @@ setup(
     test_suite="tests",
     tests_require=read_reqs("dev"),
     setup_requires=(["pytest-runner"] if {"test", "pytest", "ptr"} & set(sys.argv) else []),
-    **extra
 )
