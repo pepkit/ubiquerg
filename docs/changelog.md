@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.4] - 2019-06-20
+### Added
+- Command callability checker
+
 ## [0.4.3] - 2019-06-06
 ### Changed
 - To avoid implicitly wrapping `input()` in `eval`, never use `2to3`.
