@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.5] - 2019-07-01
+### Changed
+- If argument to callability checker is a file, require executability; if it's a folder, it's not callable.
+### Fixed
+- Populate intended field in error message for bad argument to callability checker.
+
 ## [0.4.4] - 2019-06-20
 ### Added
 - Command callability checker
