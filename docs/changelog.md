@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.4.6] - 2019-07-23
+### Added
+- file/directory size checker
+
 ## [0.4.5] - 2019-07-01
 ### Changed
 - If argument to callability checker is a file, require executability; if it's a folder, it's not callable.
