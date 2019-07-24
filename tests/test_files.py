@@ -64,5 +64,11 @@ def test_nonexistent_path(tmpdir):
 @pytest.mark.parametrize("size_num", list(range(0, 10)) + [i/3 for i in range(0, 10)])
 def test_filesize_to_str_int(size_num):
     """ Works with int and returns str """
-    print(size_num)
     assert isinstance(filesize_to_str(size_num), str)
+
+
+@pytest.mark.parametrize("obj", ["test", [], tuple()])
+def test_filesize_to_str_other(obj):
+    """ Returns the original object if it's not an int or float and warns """
+    with pytest.warns(UserWarning):
+        assert filesize_to_str(obj) == obj

@@ -2,6 +2,7 @@
 
 from hashlib import md5
 import os
+from warnings import warn
 
 __all__ = ["checksum", "size", "filesize_to_str"]
 FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
@@ -66,4 +67,5 @@ def filesize_to_str(size):
             if size < 1024:
                 return "{}{}".format(round(size, 1), unit)
             size /= 1024
+    warn("size argument was neither an int nor a float, returning the original object")
     return size
