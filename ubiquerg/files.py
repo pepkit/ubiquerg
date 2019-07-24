@@ -3,7 +3,7 @@
 from hashlib import md5
 import os
 
-__all__ = ["checksum", "size"]
+__all__ = ["checksum", "size", "filesize_to_str"]
 FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
 
@@ -33,20 +33,6 @@ def size(path, size_str=True):
     :param bool size_str: whether the size should be converted to a human-readable string, e.g. convert B to MB
     :return int|str: file size or file size string
     """
-    def _size_str(size):
-        """
-        Converts the numeric bytes to the size string
-
-        :param int|float size: file size to convert
-        :return str: file size string
-        """
-        if isinstance(size, (int, float)):
-            for unit in FILE_SIZE_UNITS:
-                if size < 1024:
-                    return "{}{}".format(round(size, 1), unit)
-                size /= 1024
-        return size
-
     if os.path.isfile(path):
         s = os.path.getsize(path)
     elif os.path.isdir(path):
@@ -65,4 +51,19 @@ def size(path, size_str=True):
     else:
         print("size could not be determined for: '{}'".format(path))
         s = None
-    return _size_str(s) if size_str else s
+    return filesize_to_str(s) if size_str else s
+
+
+def filesize_to_str(size):
+    """
+    Converts the numeric bytes to the size string
+
+    :param int|float size: file size to convert
+    :return str: file size string
+    """
+    if isinstance(size, (int, float)):
+        for unit in FILE_SIZE_UNITS:
+            if size < 1024:
+                return "{}{}".format(round(size, 1), unit)
+            size /= 1024
+    return size

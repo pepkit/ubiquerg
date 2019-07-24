@@ -3,7 +3,7 @@
 import hashlib
 import itertools
 import pytest
-from ubiquerg import checksum, size
+from ubiquerg import checksum, size, filesize_to_str
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -59,3 +59,10 @@ def test_nonexistent_path(tmpdir):
     """ Nonexistent path to checksum is erroneous. """
     with pytest.raises(IOError):
         checksum(tmpdir.join("does-not-exist.txt").strpath)
+
+
+@pytest.mark.parametrize("size_num", list(range(0, 10)) + [i/3 for i in range(0, 10)])
+def test_filesize_to_str_int(size_num):
+    """ Works with int and returns str """
+    print(size_num)
+    assert isinstance(filesize_to_str(size_num), str)
