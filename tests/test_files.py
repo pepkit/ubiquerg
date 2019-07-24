@@ -34,23 +34,23 @@ def test_checksum(size1, size2, lines, tmpdir):
 
 def test_size_returns_str(lines, tmpdir):
     """ Size returns a string and works with both files and directories """
-    fp = str(tmpdir.join("temp-data.txt").strpath)
+    fp = tmpdir.join("temp-data.txt").strpath
     data = "\n".join(lines)
     with open(fp, 'w') as f:
         f.write(data)
     assert isinstance(size(fp), str)
-    assert isinstance(size(tmpdir), str)
+    assert isinstance(size(tmpdir.strpath), str)
 
 
 def test_size_returns_int(lines, tmpdir):
-    fp = str(tmpdir.join("temp-data.txt").strpath)
-    fp_larger = str(tmpdir.join("temp-data.txt").strpath)
+    fp = tmpdir.join("temp-data.txt").strpath
+    fp_larger = tmpdir.join("temp-data.txt").strpath
     data = "\n".join(lines)
     with open(fp, 'w') as f:
         f.write(data)
     with open(fp_larger, 'w') as f1:
         f1.write(data * 100)
-    assert isinstance(size(tmpdir, False), int)
+    assert isinstance(size(tmpdir.strpath, False), int)
     assert isinstance(size(fp, False), int)
     assert size(fp, size_str=False) <= size(fp, size_str=False)
 
