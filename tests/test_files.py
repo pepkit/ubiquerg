@@ -34,7 +34,7 @@ def test_checksum(size1, size2, lines, tmpdir):
 
 def test_size_returns_str(lines, tmpdir):
     """ Size returns a string and works with both files and directories """
-    fp = tmpdir.join("temp-data.txt").strpath
+    fp = str(tmpdir.join("temp-data.txt").strpath)
     data = "\n".join(lines)
     with open(fp, 'w') as f:
         f.write(data)
@@ -43,8 +43,8 @@ def test_size_returns_str(lines, tmpdir):
 
 
 def test_size_returns_int(lines, tmpdir):
-    fp = tmpdir.join("temp-data.txt").strpath
-    fp_larger = tmpdir.join("temp-data.txt").strpath
+    fp = str(tmpdir.join("temp-data.txt").strpath)
+    fp_larger = str(tmpdir.join("temp-data.txt").strpath)
     data = "\n".join(lines)
     with open(fp, 'w') as f:
         f.write(data)
