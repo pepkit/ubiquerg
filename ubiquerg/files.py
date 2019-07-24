@@ -25,12 +25,13 @@ def checksum(path, blocksize=int(2e+9)):
     return m.hexdigest()
 
 
-def size(path):
+def size(path, size_str=True):
     """
     Gets the size of the file or directory in the provided path
 
     :param str path: path to the file to check size of
-    :return int: file size
+    :param bool size_str: whether the size should be converted to a human-readable string, e.g. convert B to MB
+    :return int|str: file size or file size string
     """
     def _size_str(size):
         """
@@ -47,7 +48,7 @@ def size(path):
         return size
 
     if os.path.isfile(path):
-        s = _size_str(os.path.getsize(path))
+        s = os.path.getsize(path)
     elif os.path.isdir(path):
         s = 0
         symlinks = []
@@ -64,4 +65,4 @@ def size(path):
     else:
         print("size could not be determined for: '{}'".format(path))
         s = None
-    return _size_str(s)
+    return _size_str(s) if size_str else s
