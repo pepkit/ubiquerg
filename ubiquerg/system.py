@@ -26,3 +26,31 @@ def is_command_callable(cmd):
     # Use `command` to see if command is callable, and rule on exit code.
     check = "command -v {0} >/dev/null 2>&1 || {{ exit 1; }}".format(cmd)
     return not bool(os.system(check))
+
+
+def _is_writeable(folder, check_exist=False, create=False):
+    """
+    Make sure a folder is writable.
+
+    Given a folder, check that it exists and is writable. Errors if requested on
+    a non-existent folder. Otherwise, make sure the first existing parent folder
+    is writable such that this folder could be created.
+
+    :param str folder: Folder to check for writeability.
+    :param bool check_exist: Throw an error if it doesn't exist?
+    :param bool create: Create the folder if it doesn't exist?
+    """
+    folder = folder or "."
+
+    if os.path.exists(folder):
+        return os.access(folder, os.W_OK) and os.access(folder, os.X_OK)
+    elif create_folder:
+        os.mkdir(folder)
+    elif check_exist:
+        raise OSError("Folder not found: {}".format(folder))
+    else:
+        _LOGGER.debug("Folder not found: {}".format(folder))
+        # The folder didn't exist. Recurse up the folder hierarchy to make sure
+        # all paths are writable
+        return _is_writeable(os.path.dirname(folder), strict_exists)
+        
