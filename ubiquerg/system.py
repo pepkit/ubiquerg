@@ -28,7 +28,7 @@ def is_command_callable(cmd):
     return not bool(os.system(check))
 
 
-def _is_writeable(folder, check_exist=False, create=False):
+def is_writeable(folder, check_exist=False, create=False):
     """
     Make sure a folder is writable.
 
@@ -44,13 +44,11 @@ def _is_writeable(folder, check_exist=False, create=False):
 
     if os.path.exists(folder):
         return os.access(folder, os.W_OK) and os.access(folder, os.X_OK)
-    elif create_folder:
+    elif create:
         os.mkdir(folder)
     elif check_exist:
         raise OSError("Folder not found: {}".format(folder))
     else:
-        _LOGGER.debug("Folder not found: {}".format(folder))
         # The folder didn't exist. Recurse up the folder hierarchy to make sure
         # all paths are writable
-        return _is_writeable(os.path.dirname(folder), strict_exists)
-        
+        return is_writeable(os.path.dirname(folder), check_exist)
