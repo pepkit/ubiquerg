@@ -28,7 +28,7 @@ def is_command_callable(cmd):
     return not bool(os.system(check))
 
 
-def is_writeable(folder, check_exist=False, create=False):
+def is_writable(folder, check_exist=False, create=False):
     """
     Make sure a folder is writable.
 
