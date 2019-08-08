@@ -3,6 +3,7 @@
 ## [0.4.6] - 2019-08-08
 ### Added
 - file/directory size checker
+- `is_writable` function
 
 ## [0.4.5] - 2019-07-01
 ### Changed
