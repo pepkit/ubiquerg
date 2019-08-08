@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.6] - 2019-07-23
+## [0.4.6] - 2019-08-08
 ### Added
 - file/directory size checker
 
