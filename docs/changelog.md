@@ -1,4 +1,7 @@
 # Changelog
+## [0.4.7] - 2019-08-09
+### Fixed
+- `is_writable` function
 
 ## [0.4.6] - 2019-08-08
 ### Added
