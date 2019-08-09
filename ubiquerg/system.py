@@ -5,7 +5,7 @@ import os
 __author__ = "Databio Lab"
 __email__ = "nathan@code.databio.org"
 
-__all__ = ["is_command_callable"]
+__all__ = ["is_command_callable", "is_writable"]
 
 
 def is_command_callable(cmd):
@@ -51,4 +51,4 @@ def is_writable(folder, check_exist=False, create=False):
     else:
         # The folder didn't exist. Recurse up the folder hierarchy to make sure
         # all paths are writable
-        return is_writeable(os.path.dirname(folder), check_exist)
+        return is_writable(os.path.dirname(folder), check_exist)
