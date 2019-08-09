@@ -1,7 +1,7 @@
 # Changelog
 ## [0.4.7] - 2019-08-09
 ### Fixed
-- `is_writable` function
+- `is_writable` function; [Issue 16](https://github.com/pepkit/ubiquerg/issues/16)
 
 ## [0.4.6] - 2019-08-08
 ### Added
