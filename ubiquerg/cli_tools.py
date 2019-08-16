@@ -12,10 +12,6 @@ __all__ = __classes__ + ["build_cli_extra", "query_yes_no"]
 
 class VersionInHelpParser(ArgumentParser):
 
-    def __init__(self, *args, **kwargs):
-        super(VersionInHelpParser, self).__init__(*args, **kwargs)
-        self.version = kwargs.pop("version", 0)
-
     def format_help(self):
         """ Add version information to help text. """
         return "version: {}\n".format(self.version) + \
