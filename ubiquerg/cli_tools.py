@@ -1,12 +1,20 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like
+from argparse import ArgumentParser
 import sys
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 __all__ = ["build_cli_extra", "query_yes_no"]
+
+
+class VersionInHelpParser(ArgumentParser):
+    def format_help(self):
+        """ Add version information to help text. """
+        return "version: {}\n".format(__version__) + \
+               super(VersionInHelpParser, self).format_help()
 
 
 def build_cli_extra(optargs):
@@ -72,3 +80,4 @@ def _read_from_user():
         from __builtin__ import raw_input
         return raw_input()
     return input()
+
