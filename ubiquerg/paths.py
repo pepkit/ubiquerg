@@ -21,12 +21,12 @@ def expandpath(path):
     return res if is_url(path) else res.replace("//", "/")
 
 
-def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "tag"]):
+def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "subitem" "tag"]):
     """
     Parse a 'registry path' string into components.
 
     A registry path is a string that is kind of like a URL, providing a unique
-    identifier for a particular asset, like protocol::namespace/item:tag.
+    identifier for a particular asset, like protocol::namespace/item.subitem:tag.
 
     :param str rpstring: string to parse
     :return dict: dict with one element for each parsed entry in the path
@@ -34,7 +34,8 @@ def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "tag"]
 
     # This commented regex is the same without protocol
     # ^(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$
-    regex = "^(?:([0-9a-zA-Z_-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$"
+    # regex = "^(?:([0-9a-zA-Z_-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$"
+    regex = "^(?:([0-9a-zA-Z_-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?:\.([0-9a-zA-Z_-]+))?(?::([0-9a-zA-Z_.-]+))?$"
     # This regex matches strings like:
     # protocol://namespace/item:tag
     # or: protocol::namespace/item:tag
@@ -60,6 +61,7 @@ def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "tag"]
         names[0]: captures[0],
         names[1]: captures[1],
         names[2]: captures[2],
-        names[3]: captures[3]
+        names[3]: captures[3],
+        names[4]: captures[4]
     }
     return parsed_identifier
