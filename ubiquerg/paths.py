@@ -1,6 +1,7 @@
 """ Filesystem utility functions """
 
 import os
+import re
 from .web import is_url
 
 __author__ = "Vince Reuter"
@@ -20,11 +21,11 @@ def expandpath(path):
     return res if is_url(path) else res.replace("//", "/")
 
 
-def parse_registry_path(rpstring):
-	"""
-	Parse a 'registry path' string into components.
+def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "tag"]):
+    """
+    Parse a 'registry path' string into components.
 
-	A registry path is a string that is kind of like a URL, providing a unique
+    A registry path is a string that is kind of like a URL, providing a unique
     identifier for a particular asset, like protocol::namespace/item:tag.
 
     :param str rpstring: string to parse
@@ -56,9 +57,9 @@ def parse_registry_path(rpstring):
     # position 3: tag
     captures = res.groups()
     parsed_identifier = {
-        "protocol": captures[0],
-        "namespace": captures[1],
-        "item": captures[2],
-        "tag": captures[3]
+        names[0]: captures[0],
+        names[1]: captures[1],
+        names[2]: captures[2],
+        names[3]: captures[3]
     }
     return parsed_identifier
