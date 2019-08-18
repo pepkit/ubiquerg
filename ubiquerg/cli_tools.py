@@ -15,11 +15,12 @@ class VersionInHelpParser(ArgumentParser):
     def __init__(self, version=None, **kwargs):
         """ Overwrites the inherited init. Saves the version as an object attribute for further use. """
         super(VersionInHelpParser, self).__init__(**kwargs)
-        self.version = str(version)
+        self.version = version
 
     def format_help(self):
         """ Add version information to help text. """
-        return "version: {}\n".format(self.version) + super(VersionInHelpParser, self).format_help()
+        help_string = "version: {}\n".format(str(self.version)) if self.version is not None else ""
+        return help_string + super(VersionInHelpParser, self).format_help()
 
 
 def build_cli_extra(optargs):
