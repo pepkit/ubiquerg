@@ -21,14 +21,26 @@ def expandpath(path):
     return res if is_url(path) else res.replace("//", "/")
 
 
-def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "subitem" "tag"]):
+def parse_registry_path(rpstring,
+                        defaults=[
+                            ("protocol", None),
+                            ("namespace", None),
+                            ("item", None),
+                            ("subitem", None),
+                            ("tag", None)]
+                        ):
     """
     Parse a 'registry path' string into components.
 
     A registry path is a string that is kind of like a URL, providing a unique
-    identifier for a particular asset, like protocol::namespace/item.subitem:tag.
+    identifier for a particular asset, like
+    protocol::namespace/item.subitem:tag. You can use the `defaults` argument to
+    change the names of the entries in the return dict, and to provide defaults
+    in case of missing values.
 
     :param str rpstring: string to parse
+    :param list defaults: A list of 5 tuples with name of the 5 entries, and a
+        default value in case it is missing (can be 'None')
     :return dict: dict with one element for each parsed entry in the path
     """
 
@@ -58,10 +70,10 @@ def parse_registry_path(rpstring, names=["protocol", "namespace", "item", "subit
     # position 3: tag
     captures = res.groups()
     parsed_identifier = {
-        names[0]: captures[0],
-        names[1]: captures[1],
-        names[2]: captures[2],
-        names[3]: captures[3],
-        names[4]: captures[4]
+        defaults[0][0]: captures[0] or defaults[0][1],
+        defaults[1][0]: captures[1] or defaults[1][1],
+        defaults[2][0]: captures[2] or defaults[2][1],
+        defaults[3][0]: captures[3] or defaults[3][1],
+        defaults[4][0]: captures[4] or defaults[4][1]
     }
     return parsed_identifier
