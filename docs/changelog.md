@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.8] - Unreleased
+## [0.4.8] - 2019-08-27
 ### Added
 - `parse_registry_path` function.
 
