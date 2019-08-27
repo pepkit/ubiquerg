@@ -1,12 +1,26 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like
+from argparse import ArgumentParser
 import sys
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
+__classes__ = ["VersionInHelpParser"]
+__all__ = __classes__ + ["build_cli_extra", "query_yes_no"]
 
-__all__ = ["build_cli_extra", "query_yes_no"]
+
+class VersionInHelpParser(ArgumentParser):
+
+    def __init__(self, version=None, **kwargs):
+        """ Overwrites the inherited init. Saves the version as an object attribute for further use. """
+        super(VersionInHelpParser, self).__init__(**kwargs)
+        self.version = version
+
+    def format_help(self):
+        """ Add version information to help text. """
+        help_string = "version: {}\n".format(str(self.version)) if self.version is not None else ""
+        return help_string + super(VersionInHelpParser, self).format_help()
 
 
 def build_cli_extra(optargs):
@@ -72,3 +86,4 @@ def _read_from_user():
         from __builtin__ import raw_input
         return raw_input()
     return input()
+
