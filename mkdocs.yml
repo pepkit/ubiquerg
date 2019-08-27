@@ -8,7 +8,7 @@ nav:
     - Home: README.md
   - Reference:
     - API: autodoc_build/ubiquerg.md
-    - Support: support.md
+    - Support: http://github.com/pepkit/ubiquerg/issues
     - Contributing: contributing.md
     - Changelog: changelog.md
 
