@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/pepkit/ubiquerg.svg?branch=master)](https://travis-ci.org/pepkit/ubiquerg)
 [![Coverage Status](https://coveralls.io/repos/github/pepkit/ubiquerg/badge.svg?branch=master)](https://coveralls.io/github/pepkit/ubiquerg?branch=master)
-[![PEP compatible](http://pepkit.github.io/img/PEP-compatible-green.svg)](http://pepkit.github.io)
+[![PEP compatible](https://pepkit.github.io/img/PEP-compatible-green.svg)](https://pepkit.github.io)
 
 Ubiquerg is a utility package with a collection of helpful universally useful functions. The name means work (erg) everywhere (ubique), indicating our intention for these to be low-level functions that can be used in lots of different places. Functions are divided into groups, including:
 
