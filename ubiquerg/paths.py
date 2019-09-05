@@ -7,7 +7,7 @@ from .web import is_url
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
-__all__ = ["expandpath", "parse_registry_path"]
+__all__ = ["expandpath", "parse_registry_path", "mkabs"]
 
 
 def expandpath(path):
@@ -77,3 +77,27 @@ def parse_registry_path(rpstring,
         defaults[4][0]: captures[4] or defaults[4][1]
     }
     return parsed_identifier
+
+
+def mkabs(path, reldir=None):
+    """
+    Makes sure a path is absolute; if not already absolute, it's made absolute
+    relative to a given directory. Also expands ~ and environment variables for
+    kicks.
+
+    :param str path: Path to make absolute
+    :param str reldir: Relative directory to make path absolute from if it's
+        not already absolute
+
+    :return str: Absolute path
+    """
+    def xpand(path):
+        return os.path.expandvars(os.path.expanduser(path))
+
+    if os.path.isabs(xpand(path)):
+        return xpand(path)
+
+    if not reldir:
+        return os.path.abspath(xpand(path))
+
+    return os.path.join(xpand(reldir), xpand(path))
