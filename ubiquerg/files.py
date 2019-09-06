@@ -3,8 +3,9 @@
 from hashlib import md5
 import os
 from warnings import warn
+from tarfile import open as topen
 
-__all__ = ["checksum", "size", "filesize_to_str"]
+__all__ = ["checksum", "size", "filesize_to_str", "untar"]
 FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 
 
@@ -69,3 +70,14 @@ def filesize_to_str(size):
             size /= 1024
     warn("size argument was neither an int nor a float, returning the original object")
     return size
+
+
+def untar(src, dst):
+    """
+    Unpack a path to a target folder. All the required directories will be created
+
+    :param str src: path to unpack
+    :param str dst: path to output folder
+    """
+    with topen(src) as tf:
+        tf.extractall(path=dst)
