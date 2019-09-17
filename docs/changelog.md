@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.4.9] - 2019-09-13
+## [0.4.9] - 2019-09-17
 ### Added
 - add `--version` argument in `VersionInHelpParser`
 - add `untar` function
