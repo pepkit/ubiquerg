@@ -1,9 +1,14 @@
 # Changelog
 
+## [0.4.9] - 2019-09-17
+### Added
+- add `--version` argument in `VersionInHelpParser`
+- add `untar` function
+- add `mkabs` function
+
 ## [0.4.8] - 2019-08-27
 ### Added
 - `parse_registry_path` function.
-
 
 ## [0.4.7] - 2019-08-09
 ### Fixed

@@ -16,6 +16,8 @@ class VersionInHelpParser(ArgumentParser):
         """ Overwrites the inherited init. Saves the version as an object attribute for further use. """
         super(VersionInHelpParser, self).__init__(**kwargs)
         self.version = version
+        if self.version is not None:
+            self.add_argument('--version', action='version', version='%(prog)s {}'.format(self.version))
 
     def format_help(self):
         """ Add version information to help text. """
