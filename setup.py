@@ -41,7 +41,7 @@ setup(
     keywords="utility, utilities, tools",
     url="https://github.com/pepkit/{}/".format(PKG),
     author=u"Vince Reuter",
-    license="BSD2",
+    license="BSD-2-Clause",
     scripts=None,
     include_package_data=True,
     test_suite="tests",
