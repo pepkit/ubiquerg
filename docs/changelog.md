@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.5.0] - 2019-10-XX
+### Added
+- add `asciify_dict` function
+
+
 ## [0.4.9] - 2019-09-17
 ### Added
 - add `--version` argument in `VersionInHelpParser`
