@@ -78,7 +78,7 @@ def asciify_dict(data):
             ret.append(item)
         return ret
 
-    if sys.version_info[0] <= 3:
+    if sys.version_info[0] >= 3:
         warn("This operation is supported only in Python2", UserWarning)
         return data
 
