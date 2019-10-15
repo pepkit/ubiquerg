@@ -209,7 +209,7 @@ def test_powerset_illegal_input(arbwrap, kwargs, exp_err, pool):
 
 @pytest.mark.parametrize("dict", [{"a": 1}, {"b": None}])
 def test_asciifying_dicts(dict):
-    if sys.version_info[0] <= 3:
+    if sys.version_info[0] >= 3:
         with pytest.warns(UserWarning):
             assert dict == asciify_dict(dict)
     else:
