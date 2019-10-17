@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.0] - 2019-10-XX
+## [0.5.0] - 2019-10-17
 ### Added
 - add `asciify_dict` function
 
