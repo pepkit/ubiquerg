@@ -2,6 +2,7 @@
 
 import itertools
 import sys
+from warnings import warn
 if sys.version_info < (3, 3):
     from collections import Iterable
 else:
@@ -11,7 +12,7 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
-__all__ = ["is_collection_like", "powerset"]
+__all__ = ["is_collection_like", "powerset", "asciify_dict"]
 
 
 def is_collection_like(c):
@@ -60,3 +61,36 @@ def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
     return list(itertools.chain.from_iterable(
             itertools.combinations(items, k)
             for k in range(min_items, max_items)))
+
+
+def asciify_dict(data):
+    """ https://gist.github.com/chris-hailstorm/4989643 """
+
+    def _asciify_list(lst):
+        ret = []
+        for item in lst:
+            if isinstance(item, unicode):
+                item = item.encode('utf-8')
+            elif isinstance(item, list):
+                item = _asciify_list(item)
+            elif isinstance(item, dict):
+                item = asciify_dict(item)
+            ret.append(item)
+        return ret
+
+    if sys.version_info[0] >= 3:
+        warn("This operation is supported only in Python2", UserWarning)
+        return data
+
+    ret = {}
+    for key, value in data.iteritems():
+        if isinstance(key, unicode):
+            key = key.encode('utf-8')
+        if isinstance(value, unicode):
+            value = value.encode('utf-8')
+        elif isinstance(value, list):
+            value = _asciify_list(value)
+        elif isinstance(value, dict):
+            value = asciify_dict(value)
+        ret[key] = value
+    return ret
