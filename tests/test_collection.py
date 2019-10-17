@@ -207,7 +207,7 @@ def test_powerset_illegal_input(arbwrap, kwargs, exp_err, pool):
         powerset(arbwrap(pool), **kwargs)
 
 
-@pytest.mark.parametrize("dict", [{"a": 1}, {"b": None}])
+@pytest.mark.parametrize("dict", [{"a": 1}, {"b": None}, {"b": [u'test', ["test", u'test']], "c": [{"b": 1}]}])
 def test_asciifying_dicts(dict):
     if sys.version_info[0] >= 3:
         with pytest.warns(UserWarning):
