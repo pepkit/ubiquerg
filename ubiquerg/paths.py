@@ -17,8 +17,7 @@ def expandpath(path):
     :param str path: path to expand
     :return str: expanded version of input path
     """
-    res = os.path.expandvars(os.path.expanduser(path))
-    return res if is_url(path) else res.replace("//", "/")
+    return os.path.expandvars(os.path.expanduser(path))
 
 
 def parse_registry_path(rpstring,
