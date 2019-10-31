@@ -18,7 +18,7 @@ def is_command_callable(cmd):
     :raise ValueError: if the alleged command is empty
     """
     if not isinstance(cmd, str):
-        raise TypeError("Alleged command isn't a string: {} ({})")
+        raise TypeError("Alleged command isn't a string: {} ({})").format(cmd, type(cmd))
     if not cmd:
         raise ValueError("Empty command to check for callability")
     if os.path.isdir(cmd) or (os.path.isfile(cmd) and not os.access(cmd, os.X_OK)):
