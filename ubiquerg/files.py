@@ -37,8 +37,8 @@ def size(path, size_str=True):
     """
 
     if isinstance(path, list):
-        s_list = sum(filter(None, [size(x, size_str=False) for x in path])
-        return filesize_to_str(s) if size_str else s
+        s_list = sum(filter(None, [size(x, size_str=False) for x in path]))
+        return filesize_to_str(s_list) if size_str else s_list
 
     if os.path.isfile(path):
         s = os.path.getsize(path)
