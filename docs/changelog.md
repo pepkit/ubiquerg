@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1] - 2020-03-30
+### Added
+- uniqify function
+
+### Changed
+- size function accepts lists of paths
+
 ## [0.5.0] - 2019-10-17
 ### Added
 - add `asciify_dict` function
