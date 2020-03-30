@@ -24,6 +24,16 @@ def is_collection_like(c):
     """
     return isinstance(c, Iterable) and not isinstance(c, str)
 
+def uniqify(seq):  # Dave Kirby
+    """
+    Return only unique items in a sequence, preserving order
+
+    :param list seq: List of items to uniqify
+    :return list[object]: Original list with duplicates removed
+    """
+    # Order preserving
+    seen = set()
+    return [x for x in seq if x not in seen and not seen.add(x)]
 
 def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
     """

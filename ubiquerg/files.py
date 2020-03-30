@@ -29,12 +29,17 @@ def checksum(path, blocksize=int(2e+9)):
 
 def size(path, size_str=True):
     """
-    Gets the size of the file or directory in the provided path
+    Gets the size of a file or directory or list of them in the provided path
 
-    :param str path: path to the file to check size of
+    :param str|list path: path or list of paths to the file or directories to check size of
     :param bool size_str: whether the size should be converted to a human-readable string, e.g. convert B to MB
     :return int|str: file size or file size string
     """
+
+    if isinstance(path, list):
+        s_list = sum(filter(None, [size(x, size_str=False) for x in path]))
+        return filesize_to_str(s_list) if size_str else s_list
+
     if os.path.isfile(path):
         s = os.path.getsize(path)
     elif os.path.isdir(path):
