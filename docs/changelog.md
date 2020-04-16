@@ -1,9 +1,18 @@
 # Changelog
 
+## [0.5.1] - 2020-03-30
+### Added
+- `uniqify` function
+- support for collection of paths in `size` function
+
+### Fixed
+- path expansion issues; [Issue #24](https://github.com/pepkit/ubiquerg/issues/24)
+
+### Changed
+  
 ## [0.5.0] - 2019-10-17
 ### Added
 - add `asciify_dict` function
-
 
 ## [0.4.9] - 2019-09-17
 ### Added
