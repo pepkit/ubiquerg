@@ -1,5 +1,7 @@
 # Changelog
 
+## [0.5.2] - unreleased
+
 ## [0.5.1] - 2020-03-30
 ### Added
 - `uniqify` function
