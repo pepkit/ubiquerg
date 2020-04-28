@@ -1,11 +1,11 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like
-from argparse import ArgumentParser, _SubParsersAction, _HelpAction
+from argparse import ArgumentParser, _SubParsersAction, _HelpAction, _VersionAction
 import sys
 
 __classes__ = ["VersionInHelpParser"]
-__all__ = __classes__ + ["build_cli_extra", "query_yes_no"]
+__all__ = __classes__ + ["build_cli_extra", "query_yes_no", "convert_value"]
 
 
 class VersionInHelpParser(ArgumentParser):
@@ -37,6 +37,17 @@ class VersionInHelpParser(ArgumentParser):
                 "Expected exactly 1 subparser, got {}".format(len(subs)))
         return subs[0]
 
+    def top_level_args(self):
+        """
+        Get actions not assiated with any subparser.
+
+        Help and version are also excluded
+
+        :return list[argparse.<action_type>]: list of argument actions
+        """
+        excl = [_SubParsersAction, _HelpAction, _VersionAction]
+        return [a for a in self._actions if not type(a) in excl]
+
     def subcommands(self):
         """
         Get subcommands defined by a parser.
@@ -45,13 +56,21 @@ class VersionInHelpParser(ArgumentParser):
         """
         return list(self.subparsers().choices.keys())
 
-    def dests_by_subparser(self, subcommand=None):
+    def dests_by_subparser(self, subcommand=None, top_level=False):
         """
         Get argument dests by subcommand from a parser.
 
         :param str subcommand: subcommand to get dests for
         :return dict: dests by subcommand
         """
+        if top_level:
+            top_level_actions = self.top_level_args()
+            dest_list = []
+            for tla in top_level_actions:
+                if hasattr(tla, "dest"):
+                    dest_list.append(tla.dest)
+            return dest_list
+
         if subcommand is not None and subcommand not in self.subcommands():
             raise ValueError("'{}' not found in this parser commands: {}".
                              format(subcommand, str(self.subcommands())))
@@ -67,6 +86,44 @@ class VersionInHelpParser(ArgumentParser):
                     dest_list.append(action.dest)
             dests[subcmd] = dest_list
         return dests
+
+    def arg_defaults(self, subcommand=None, unique=False, top_level=False):
+        """
+        Get argument defaults by subcommand from a parser.
+
+        :param str subcommand: subcommand to get defaults for
+        :param bool unique: whether only unique flat dict of dests and
+            defaults mapping should be returned
+        :return dict: defaults by subcommand
+        """
+        if top_level:
+            top_level_actions = self.top_level_args()
+            defaults_dict = {}
+            for tla in top_level_actions:
+                if hasattr(tla, "default") and hasattr(tla, "dest"):
+                    defaults_dict.update({tla.dest: tla.default})
+            return defaults_dict
+
+        if subcommand is not None and subcommand not in self.subcommands():
+            raise ValueError("'{}' not found in this parser commands: {}".
+                             format(subcommand, str(self.subcommands())))
+        subs = self.subparsers().choices if subcommand is None \
+            else {subcommand: self.subparsers().choices[subcommand]}
+        defaults = {}
+        for subcmd, sub in subs.items():
+            defaults_dict = {}
+            for action in sub._actions:
+                if isinstance(action, _HelpAction):
+                    continue
+                if hasattr(action, "default") and hasattr(action, "dest"):
+                    defaults_dict.update({action.dest: action.default})
+            defaults[subcmd] = defaults_dict
+            if unique:
+                unique_defaults = {}
+                for k, v in defaults.items():
+                    unique_defaults = {**unique_defaults, **v}
+                return unique_defaults
+        return defaults
 
 
 def build_cli_extra(optargs):
@@ -126,6 +183,44 @@ def query_yes_no(question, default="no"):
         except KeyError:
             sys.stdout.write(
                 "Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+
+
+def convert_value(val):
+    """
+    Convert string to the most appropriate type, one of:
+    bool, str, int, None or float
+
+    :param str val: the string to convert
+    :return bool | str | int | float | None: converted string to the
+        most appropriate type
+    """
+    if not isinstance(val, str):
+        try:
+            val = str(val)
+        except:
+            raise ValueError("The input has to be of type convertible to 'str',"
+                             " got '{}'".format(type(val)))
+
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        if val == 'None':
+            return None
+        if val.lower() == 'true':
+            return True
+        if val.lower() == 'false':
+            return False
+        try:
+            float(val)
+        except ValueError:
+            return val
+        else:
+            try:
+                int(val)
+            except ValueError:
+                return float(val)
+            else:
+                return int(val)
 
 
 def _read_from_user():
