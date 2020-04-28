@@ -1,6 +1,6 @@
 """ Functions for working with command-line interaction """
 
-from .collection import is_collection_like
+from .collection import is_collection_like, merge_dicts
 from argparse import ArgumentParser, _SubParsersAction, _HelpAction, _VersionAction
 import sys
 
@@ -121,7 +121,7 @@ class VersionInHelpParser(ArgumentParser):
             if unique:
                 unique_defaults = {}
                 for k, v in defaults.items():
-                    unique_defaults = {**unique_defaults, **v}
+                    unique_defaults = merge_dicts(unique_defaults, v)
                 return unique_defaults
         return defaults
 
