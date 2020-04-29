@@ -214,3 +214,7 @@ def test_asciifying_dicts(dict):
             assert dict == asciify_dict(dict)
     else:
         asciify_dict(dict)
+
+@pytest.mark.parametrize(["x", "y"], [({"a": 1}, {"b": 2}), ({"a": 1, "c": 2}, {"b": 2})])
+def test_merging_dicts(x, y):
+    assert "a" in list(merge_dicts(x, y).keys())
