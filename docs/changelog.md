@@ -1,16 +1,22 @@
 # Changelog
 
+## [0.5.2] - unreleased
+### Changed
+- in `size` function, if a file is not found a warning is issued, instead of a message
+
 ## [0.5.1] - 2020-03-30
 ### Added
-- uniqify function
+- `uniqify` function
+- support for collection of paths in `size` function
+
+### Fixed
+- path expansion issues; [Issue #24](https://github.com/pepkit/ubiquerg/issues/24)
 
 ### Changed
-- size function accepts lists of paths
-
+  
 ## [0.5.0] - 2019-10-17
 ### Added
 - add `asciify_dict` function
-
 
 ## [0.4.9] - 2019-09-17
 ### Added
