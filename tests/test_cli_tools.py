@@ -14,8 +14,8 @@ def pytest_generate_tests(metafunc):
 
 def build_parser():
     """
-    Building argument parser.
-    This example parser was copeied from loooper/__init_.py
+    Example argument parser, needed solely for testing purposes.
+    This example parser was copied from looper/__init__.py
 
     :return argparse.ArgumentParser
     """
