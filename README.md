@@ -12,6 +12,7 @@ Ubiquerg is a utility package with a collection of helpful universally useful fu
 - paths
 - system
 - web
+- cli_tools
 
 ## Development guidelines
 
