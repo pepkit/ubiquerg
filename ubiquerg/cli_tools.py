@@ -1,7 +1,8 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like, merge_dicts
-from argparse import ArgumentParser, _SubParsersAction, _HelpAction, _VersionAction
+from argparse import ArgumentParser, _SubParsersAction, _HelpAction, \
+    _VersionAction, SUPPRESS
 import sys
 
 __classes__ = ["VersionInHelpParser"]
@@ -86,6 +87,21 @@ class VersionInHelpParser(ArgumentParser):
                     dest_list.append(action.dest)
             dests[subcmd] = dest_list
         return dests
+
+    def suppress_defaults(self):
+        """
+        Remove parser change defaults to argparse.SUPPRESS so that they do not
+        show up in the argparse.Namespace object after argument parsing.
+        """
+        top_level_actions = self.top_level_args()
+        for tla in top_level_actions:
+            if hasattr(tla, "dest"):
+                tla.dest = SUPPRESS
+        subs = self.subparsers().choices
+        for subcmd, sub in subs.items():
+            for sa in sub._actions:
+                if hasattr(sa, "dest"):
+                    sa.default = SUPPRESS
 
     def arg_defaults(self, subcommand=None, unique=False, top_level=False):
         """
