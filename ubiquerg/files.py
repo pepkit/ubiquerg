@@ -31,8 +31,10 @@ def size(path, size_str=True):
     """
     Gets the size of a file or directory or list of them in the provided path
 
-    :param str|list path: path or list of paths to the file or directories to check size of
-    :param bool size_str: whether the size should be converted to a human-readable string, e.g. convert B to MB
+    :param str|list path: path or list of paths to the file or directories
+        to check size of
+    :param bool size_str: whether the size should be converted to a
+        human-readable string, e.g. convert B to MB
     :return int|str: file size or file size string
     """
 
@@ -54,9 +56,10 @@ def size(path, size_str=True):
                     s += os.lstat(fp).st_size
                     symlinks.append(fp)
         if len(symlinks) > 0:
-            print("{} symlinks were found: '{}'".format(len(symlinks), "\n".join(symlinks)))
+            print("{} symlinks were found: {}".format(len(symlinks),
+                                                      "\n".join(symlinks)))
     else:
-        print("size could not be determined for: '{}'".format(path))
+        warn("size could not be determined for: {}".format(path))
         s = None
     return filesize_to_str(s) if size_str else s
 
@@ -73,13 +76,15 @@ def filesize_to_str(size):
             if size < 1024:
                 return "{}{}".format(round(size, 1), unit)
             size /= 1024
-    warn("size argument was neither an int nor a float, returning the original object")
+    warn("size argument was neither an int nor a float, "
+         "returning the original object")
     return size
 
 
 def untar(src, dst):
     """
-    Unpack a path to a target folder. All the required directories will be created
+    Unpack a path to a target folder.
+    All the required directories will be created
 
     :param str src: path to unpack
     :param str dst: path to output folder

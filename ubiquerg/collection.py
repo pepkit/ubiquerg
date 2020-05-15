@@ -12,17 +12,32 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
-__all__ = ["is_collection_like", "powerset", "asciify_dict"]
+__all__ = ["is_collection_like", "powerset", "asciify_dict", "merge_dicts"]
+
+
+def merge_dicts(x, y):
+    """
+    Merge dictionaries
+
+    :param Mapping x: dict to merge
+    :param Mapping y: dict to merge
+    :return Mapping: merged dict
+    """
+    z = x.copy()
+    z.update(y)
+    return z
 
 
 def is_collection_like(c):
     """
+
     Determine whether an object is collection-like.
 
     :param object c: Object to test as collection
     :return bool: Whether the argument is a (non-string) collection
     """
     return isinstance(c, Iterable) and not isinstance(c, str)
+
 
 def uniqify(seq):  # Dave Kirby
     """
@@ -34,6 +49,7 @@ def uniqify(seq):  # Dave Kirby
     # Order preserving
     seen = set()
     return [x for x in seq if x not in seen and not seen.add(x)]
+
 
 def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
     """

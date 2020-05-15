@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.5.2] - 2020-05-15
+### Changed
+- in `size` function, if a file is not found a warning is issued, instead of a message
+
+### Added
+- `VersionInHelpParser` methods characterizing the instance: 
+    - `arg_defaults`
+    - `dests_by_subparser`
+    - `subcommands`
+    - `top_level_args`
+    - `subparsers`
+
 ## [0.5.1] - 2020-03-30
 ### Added
 - `uniqify` function
