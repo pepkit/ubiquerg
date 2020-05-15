@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.5.2] - unreleased
+## [0.5.2] - 2020-05-15
 ### Changed
 - in `size` function, if a file is not found a warning is issued, instead of a message
 
