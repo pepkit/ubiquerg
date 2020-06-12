@@ -140,6 +140,7 @@ def create_file_racefree(file):
     OSError, solving race conditions.
 
     :param str file: File to create.
+    :raise OSError: if the file to be created already exists
     """
     write_lock_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     fd = os.open(file, write_lock_flags)
