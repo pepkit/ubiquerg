@@ -84,11 +84,6 @@ class TestLocking:
     def test_lock_path_creation_multi(self, pth):
         assert len(make_lock_path(pth)) == len(pth)
 
-    @pytest.mark.parametrize("pth", [1, 2, 3])
-    def test_lock_path_creation_invalid(self, pth):
-        with pytest.raises(TypeError):
-            make_lock_path(pth)
-
     @pytest.mark.parametrize("fn", ["a.yaml", "a.txt"])
     def test_racefree_file_creation_basic(self, fn):
         fp = os.path.join(mkdtemp(), fn)
