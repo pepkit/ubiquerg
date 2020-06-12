@@ -9,7 +9,9 @@ from warnings import warn
 from tarfile import open as topen
 from hashlib import md5
 
-__all__ = ["checksum", "size", "filesize_to_str", "untar"]
+__all__ = ["checksum", "size", "filesize_to_str", "untar", "create_lock",
+           "remove_lock", "wait_for_lock", "create_file_racefree",
+           "make_lock_path"]
 FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
 LOCK_PREFIX = "lock."
 
