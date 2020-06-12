@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] - unreleased
+
+### Added
+- file locking utilities:
+    - `create_lock`
+    - `remove_lock`
+    - `make_lock_path`
+    - `create_file_racefree`
+    - `wait_for_lock`
+    
 ## [0.5.2] - 2020-05-15
 ### Changed
 - in `size` function, if a file is not found a warning is issued, instead of a message
