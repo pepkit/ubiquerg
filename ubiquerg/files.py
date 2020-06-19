@@ -123,7 +123,7 @@ def wait_for_lock(lock_file, wait_max=10):
         sys.stdout.flush()
         time.sleep(sleeptime)
         totaltime += sleeptime
-        sleeptime = min((sleeptime + .2) * 2, 10)
+        sleeptime = min((sleeptime + .25) * 1.25, 10)
         if totaltime >= wait_max:
             raise RuntimeError("The maximum wait time has been reached and the "
                                "lock file still exists.")
