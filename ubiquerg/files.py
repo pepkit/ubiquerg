@@ -100,7 +100,7 @@ def untar(src, dst):
         tf.extractall(path=dst)
 
 
-def wait_for_lock(lock_file, wait_max=10):
+def wait_for_lock(lock_file, wait_max=30):
     """
     Just sleep until the lock_file does not exist
 
@@ -125,8 +125,8 @@ def wait_for_lock(lock_file, wait_max=10):
         totaltime += sleeptime
         sleeptime = min((sleeptime + .25) * 1.25, 10)
         if totaltime >= wait_max:
-            raise RuntimeError("The maximum wait time has been reached and the "
-                               "lock file still exists.")
+            raise RuntimeError("The maximum wait time ({}) has been reached and the "
+                               "lock file still exists.".format(wait_max))
     if first_message_flag:
         print(" File unlocked")
 
