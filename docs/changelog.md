@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.6.0] - unreleased
+## [0.6.0] - 2020-06-23
 
 ### Added
 - file locking utilities:
