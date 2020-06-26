@@ -186,21 +186,21 @@ def create_lock(filepath, wait_max=10):
     :param int wait_max: max wait time if the file in question is already locked
     """
     lock_path = make_lock_path(filepath)
-    if os.path.exists(lock_path):
-        wait_for_lock(lock_path, wait_max)
-    else:
-        try:
+    # wait until no lock is present
+    wait_for_lock(lock_path, wait_max)
+    # attempt to lock the file
+    try:
+        create_file_racefree(lock_path)
+    except FileNotFoundError:
+        parent_dir = os.path.dirname(filepath)
+        os.makedirs(parent_dir)
+        create_file_racefree(lock_path)
+    except Exception as e:
+        if e.errno == errno.EEXIST:
+            # Rare case: file already exists;
+            # the lock has been created in the split second since the last lock existence check,
+            # wait for the lock file to be gone, but no longer than `wait_max`.
+            wait_for_lock(lock_path, wait_max)
             create_file_racefree(lock_path)
-        except FileNotFoundError:
-            os.makedirs(os.path.dirname(filepath))
-            create_file_racefree(lock_path)
-        except Exception as e:
-            if e.errno == errno.EEXIST:
-                # Rare case: file already exists; the lock has been created in
-                # the split second since the last lock existence check, wait
-                # for the lock file to be gone, but no longer than `wait_max`.
-                warn("Could not create a lock file, it already exists: {}".
-                     format(lock_path))
-                wait_for_lock(lock_path, wait_max)
-            else:
-                raise e
+        else:
+            raise e
