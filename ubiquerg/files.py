@@ -123,7 +123,7 @@ def wait_for_lock(lock_file, wait_max=30):
         sys.stdout.flush()
         time.sleep(sleeptime)
         totaltime += sleeptime
-        sleeptime = min((sleeptime + .25) * 1.25, 10)
+        sleeptime = min((sleeptime + .1) * 1.25, 10)
         if totaltime >= wait_max:
             raise RuntimeError("The maximum wait time ({}) has been reached and the "
                                "lock file still exists.".format(wait_max))
@@ -194,7 +194,7 @@ def create_lock(filepath, wait_max=10):
         except FileNotFoundError:
             os.makedirs(os.path.dirname(filepath))
             create_file_racefree(lock_path)
-        except OSError as e:
+        except Exception as e:
             if e.errno == errno.EEXIST:
                 # Rare case: file already exists; the lock has been created in
                 # the split second since the last lock existence check, wait
