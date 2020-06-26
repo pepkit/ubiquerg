@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.6.1] - unreleased
+
+### Changed
+- file locking enhancements
+
 ## [0.6.0] - 2020-06-23
 
 ### Added
