@@ -100,6 +100,25 @@ def untar(src, dst):
         tf.extractall(path=dst)
 
 
+def get_file_mod_time(pth):
+    """
+    Safely get last modification time for a file. Prevents situation when file
+    is deleted between file existence check and last file modification check.
+
+    :param str pth: file path to check
+    :return float: number of seconds since Jan 1, 1970 00:00:00
+    """
+    msg = "Could not determine timestamp for '{}'".format(pth)
+    if os.path.isfile(pth):
+        try:
+            return os.path.getmtime(pth)
+        except Exception as e:
+            print(msg + "Returning current time. Caught exception: {}".
+                  format(pth, getattr(e, 'message', repr(e))))
+            return time.time()
+    raise FileNotFoundError(msg)
+
+
 def wait_for_lock(lock_file, wait_max=30):
     """
     Just sleep until the lock_file does not exist
@@ -111,8 +130,7 @@ def wait_for_lock(lock_file, wait_max=30):
     first_message_flag = False
     dot_count = 0
     totaltime = 0
-    if os.path.isfile(lock_file):
-        ori_timestamp = os.path.getmtime(lock_file)
+    ori_timestamp = get_file_mod_time(lock_file)
     while os.path.isfile(lock_file):
         if first_message_flag is False:
             sys.stdout.write("Waiting for file lock: {} ".format(lock_file))
@@ -128,7 +146,7 @@ def wait_for_lock(lock_file, wait_max=30):
         sleeptime = min((sleeptime + .1) * 1.25, 10)
         if totaltime >= wait_max:
             if os.path.isfile(lock_file):
-                timestamp = os.path.getmtime(lock_file)
+                timestamp = get_file_mod_time(lock_file)
                 if timestamp > ori_timestamp:
                     ori_timestamp = timestamp
                     totaltime = 0
