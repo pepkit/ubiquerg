@@ -108,15 +108,12 @@ def get_file_mod_time(pth):
     :param str pth: file path to check
     :return float: number of seconds since Jan 1, 1970 00:00:00
     """
-    msg = "Could not determine timestamp for '{}'".format(pth)
-    if os.path.isfile(pth):
-        try:
-            return os.path.getmtime(pth)
-        except Exception as e:
-            print(msg + "Returning current time. Caught exception: {}".
-                  format(pth, getattr(e, 'message', repr(e))))
-            return time.time()
-    raise FileNotFoundError(msg)
+    try:
+        return os.path.getmtime(pth)
+    except Exception as e:
+        print("Could not determine timestamp for '{}'. Returning current time. "
+              "Caught exception: {}".format(pth, getattr(e, 'message', repr(e))))
+        return time.time()
 
 
 def wait_for_lock(lock_file, wait_max=30):
