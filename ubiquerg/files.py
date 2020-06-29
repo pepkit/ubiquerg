@@ -130,6 +130,7 @@ def wait_for_lock(lock_file, wait_max=30):
     first_message_flag = False
     dot_count = 0
     totaltime = 0
+    ori_timestamp = None
     if os.path.isfile(lock_file):
         ori_timestamp = get_file_mod_time(lock_file)
     while os.path.isfile(lock_file):
@@ -148,7 +149,7 @@ def wait_for_lock(lock_file, wait_max=30):
         if totaltime >= wait_max:
             if os.path.isfile(lock_file):
                 timestamp = get_file_mod_time(lock_file)
-                if timestamp > ori_timestamp:
+                if ori_timestamp and timestamp > ori_timestamp:
                     ori_timestamp = timestamp
                     totaltime = 0
                     sleeptime = 0
