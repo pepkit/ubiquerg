@@ -100,6 +100,22 @@ def untar(src, dst):
         tf.extractall(path=dst)
 
 
+def get_file_mod_time(pth):
+    """
+    Safely get last modification time for a file. Prevents situation when file
+    is deleted between file existence check and last file modification check.
+
+    :param str pth: file path to check
+    :return float: number of seconds since Jan 1, 1970 00:00:00
+    """
+    try:
+        return os.path.getmtime(pth)
+    except Exception as e:
+        print("Could not determine timestamp for '{}'. Returning current time. "
+              "Caught exception: {}".format(pth, getattr(e, 'message', repr(e))))
+        return time.time()
+
+
 def wait_for_lock(lock_file, wait_max=30):
     """
     Just sleep until the lock_file does not exist
@@ -111,6 +127,9 @@ def wait_for_lock(lock_file, wait_max=30):
     first_message_flag = False
     dot_count = 0
     totaltime = 0
+    ori_timestamp = None
+    if os.path.isfile(lock_file):
+        ori_timestamp = get_file_mod_time(lock_file)
     while os.path.isfile(lock_file):
         if first_message_flag is False:
             sys.stdout.write("Waiting for file lock: {} ".format(lock_file))
@@ -123,10 +142,18 @@ def wait_for_lock(lock_file, wait_max=30):
         sys.stdout.flush()
         time.sleep(sleeptime)
         totaltime += sleeptime
-        sleeptime = min((sleeptime + .25) * 1.25, 10)
+        sleeptime = min((sleeptime + .1) * 1.25, 10)
         if totaltime >= wait_max:
-            raise RuntimeError("The maximum wait time ({}) has been reached and the "
-                               "lock file still exists.".format(wait_max))
+            if os.path.isfile(lock_file):
+                timestamp = get_file_mod_time(lock_file)
+                if ori_timestamp and timestamp > ori_timestamp:
+                    ori_timestamp = timestamp
+                    totaltime = 0
+                    sleeptime = 0
+                    continue
+                raise RuntimeError(
+                    "The maximum wait time ({}) has been reached and the lock "
+                    "file still exists.".format(wait_max))
     if first_message_flag:
         print(" File unlocked")
 
@@ -178,6 +205,29 @@ def remove_lock(filepath):
     return False
 
 
+def _create_lock(lock_path, filepath, wait_max):
+    try:
+        create_file_racefree(lock_path)
+    except FileNotFoundError:
+        parent_dir = os.path.dirname(filepath)
+        os.makedirs(parent_dir)
+        _create_lock(lock_path, filepath, wait_max)
+    except Exception as e:
+        if e.errno == errno.EEXIST:
+            # Rare case: file already exists;
+            # the lock has been created in the split second since the
+            # last lock existence check,
+            # wait for the lock file to be gone, but no longer than
+            # `wait_max`.
+            print(
+                "The lock has been created in the split second since the "
+                "last lock existence check. Waiting")
+            wait_for_lock(lock_path, wait_max)
+            _create_lock(lock_path, filepath, wait_max)
+        else:
+            raise e
+
+
 def create_lock(filepath, wait_max=10):
     """
     Securely create a lock file
@@ -186,21 +236,6 @@ def create_lock(filepath, wait_max=10):
     :param int wait_max: max wait time if the file in question is already locked
     """
     lock_path = make_lock_path(filepath)
-    if os.path.exists(lock_path):
-        wait_for_lock(lock_path, wait_max)
-    else:
-        try:
-            create_file_racefree(lock_path)
-        except FileNotFoundError:
-            os.makedirs(os.path.dirname(filepath))
-            create_file_racefree(lock_path)
-        except OSError as e:
-            if e.errno == errno.EEXIST:
-                # Rare case: file already exists; the lock has been created in
-                # the split second since the last lock existence check, wait
-                # for the lock file to be gone, but no longer than `wait_max`.
-                warn("Could not create a lock file, it already exists: {}".
-                     format(lock_path))
-                wait_for_lock(lock_path, wait_max)
-            else:
-                raise e
+    # wait until no lock is present
+    wait_for_lock(lock_path, wait_max)
+    _create_lock(lock_path, filepath, wait_max)
