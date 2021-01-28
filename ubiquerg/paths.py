@@ -2,7 +2,6 @@
 
 import os
 import re
-from .web import is_url
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
