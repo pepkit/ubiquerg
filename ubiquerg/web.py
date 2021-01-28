@@ -1,14 +1,6 @@
 """ Web-related utilities """
 
-import sys
-if sys.version_info < (3, 0):
-    from urlparse import urlparse
-else:
-    from urllib.parse import urlparse
-
-
-__author__ = "Vince Reuter"
-__email__ = "vreuter@virginia.edu"
+import re
 
 __all__ = ["is_url"]
 
@@ -20,4 +12,14 @@ def is_url(maybe_url):
     :param str maybe_url: path to investigate as URL
     :return bool: whether path appears to be a URL
     """
-    return urlparse(maybe_url).scheme != ""
+    # from Django, access date: 2021/01/28
+    # https://github.com/django/django/blob/6726d750979a7c29e0dd866b4ea367eef7c8a420/django/core/validators.py#L45-L51
+    regex = re.compile(
+        r'^(?:http|ftp)s?://'
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
+        r'localhost|'
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+        r'(?::\d+)?'
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE
+    )
+    return re.match(regex, maybe_url) is not None
