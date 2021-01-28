@@ -12,7 +12,7 @@ def is_url(maybe_url):
     :param str maybe_url: path to investigate as URL
     :return bool: whether path appears to be a URL
     """
-    # from Django, access date: 2021/01/28
+    # from Django 1.3.x
     # https://github.com/django/django/blob/6726d750979a7c29e0dd866b4ea367eef7c8a420/django/core/validators.py#L45-L51
     regex = re.compile(
         r'^(?:http|ftp)s?://'
