@@ -9,14 +9,22 @@ from warnings import warn
 from tarfile import open as topen
 from hashlib import md5
 
-__all__ = ["checksum", "size", "filesize_to_str", "untar", "create_lock",
-           "remove_lock", "wait_for_lock", "create_file_racefree",
-           "make_lock_path"]
-FILE_SIZE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+__all__ = [
+    "checksum",
+    "size",
+    "filesize_to_str",
+    "untar",
+    "create_lock",
+    "remove_lock",
+    "wait_for_lock",
+    "create_file_racefree",
+    "make_lock_path",
+]
+FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
 LOCK_PREFIX = "lock."
 
 
-def checksum(path, blocksize=int(2e+9)):
+def checksum(path, blocksize=int(2e9)):
     """
     Generate a md5 checksum for the file contents in the provided path.
 
@@ -25,7 +33,7 @@ def checksum(path, blocksize=int(2e+9)):
     :return str: checksum hash
     """
     m = md5()
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         while True:
             buf = f.read(blocksize)
             if not buf:
@@ -63,8 +71,9 @@ def size(path, size_str=True):
                     s += os.lstat(fp).st_size
                     symlinks.append(fp)
         if len(symlinks) > 0:
-            print("{} symlinks were found: {}".format(len(symlinks),
-                                                      "\n".join(symlinks)))
+            print(
+                "{} symlinks were found: {}".format(len(symlinks), "\n".join(symlinks))
+            )
     else:
         warn("size could not be determined for: {}".format(path))
         s = None
@@ -83,8 +92,9 @@ def filesize_to_str(size):
             if size < 1024:
                 return "{}{}".format(round(size, 1), unit)
             size /= 1024
-    warn("size argument was neither an int nor a float, "
-         "returning the original object")
+    warn(
+        "size argument was neither an int nor a float, " "returning the original object"
+    )
     return size
 
 
@@ -111,8 +121,10 @@ def get_file_mod_time(pth):
     try:
         return os.path.getmtime(pth)
     except Exception as e:
-        print("Could not determine timestamp for '{}'. Returning current time. "
-              "Caught exception: {}".format(pth, getattr(e, 'message', repr(e))))
+        print(
+            "Could not determine timestamp for '{}'. Returning current time. "
+            "Caught exception: {}".format(pth, getattr(e, "message", repr(e)))
+        )
         return time.time()
 
 
@@ -123,7 +135,7 @@ def wait_for_lock(lock_file, wait_max=30):
     :param str lock_file: Lock file to wait upon.
     :param int wait_max: max wait time if the file in question is already locked
     """
-    sleeptime = .001
+    sleeptime = 0.001
     first_message_flag = False
     dot_count = 0
     totaltime = 0
@@ -142,7 +154,7 @@ def wait_for_lock(lock_file, wait_max=30):
         sys.stdout.flush()
         time.sleep(sleeptime)
         totaltime += sleeptime
-        sleeptime = min((sleeptime + .1) * 1.25, 10)
+        sleeptime = min((sleeptime + 0.1) * 1.25, 10)
         if totaltime >= wait_max:
             if os.path.isfile(lock_file):
                 timestamp = get_file_mod_time(lock_file)
@@ -153,7 +165,8 @@ def wait_for_lock(lock_file, wait_max=30):
                     continue
                 raise RuntimeError(
                     "The maximum wait time ({}) has been reached and the lock "
-                    "file still exists.".format(wait_max))
+                    "file still exists.".format(wait_max)
+                )
     if first_message_flag:
         print(" File unlocked")
 
@@ -182,12 +195,17 @@ def make_lock_path(lock_name_base):
     :param str | list[str] lock_name_base: Lock file names
     :return str | list[str]: Path to the lock files.
     """
+
     def _mk_lock(lnb):
         base, name = os.path.split(lnb)
         lock_name = name if name.startswith(LOCK_PREFIX) else LOCK_PREFIX + name
         return lock_name if not base else os.path.join(base, lock_name)
-    return [_mk_lock(x) for x in lock_name_base] \
-        if isinstance(lock_name_base, list) else _mk_lock(lock_name_base)
+
+    return (
+        [_mk_lock(x) for x in lock_name_base]
+        if isinstance(lock_name_base, list)
+        else _mk_lock(lock_name_base)
+    )
 
 
 def remove_lock(filepath):
@@ -221,7 +239,8 @@ def _create_lock(lock_path, filepath, wait_max):
             # `wait_max`.
             print(
                 "The lock has been created in the split second since the "
-                "last lock existence check. Waiting")
+                "last lock existence check. Waiting"
+            )
             wait_for_lock(lock_path, wait_max)
             _create_lock(lock_path, filepath, wait_max)
         else:

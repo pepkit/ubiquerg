@@ -1,8 +1,13 @@
 """ Functions for working with command-line interaction """
 
 from .collection import is_collection_like, merge_dicts
-from argparse import ArgumentParser, _SubParsersAction, _HelpAction, \
-    _VersionAction, SUPPRESS
+from argparse import (
+    ArgumentParser,
+    _SubParsersAction,
+    _HelpAction,
+    _VersionAction,
+    SUPPRESS,
+)
 import sys
 
 __classes__ = ["VersionInHelpParser"]
@@ -10,20 +15,25 @@ __all__ = __classes__ + ["build_cli_extra", "query_yes_no", "convert_value"]
 
 
 class VersionInHelpParser(ArgumentParser):
-
     def __init__(self, version=None, **kwargs):
-        """ Overwrites the inherited init. Saves the version as an object
-        attribute for further use. """
+        """Overwrites the inherited init. Saves the version as an object
+        attribute for further use."""
         super(VersionInHelpParser, self).__init__(**kwargs)
         self.version = version
         if self.version is not None:
-            self.add_argument('--version', action='version',
-                              version='%(prog)s {}'.format(self.version))
+            self.add_argument(
+                "--version",
+                action="version",
+                version="%(prog)s {}".format(self.version),
+            )
 
     def format_help(self):
         """ Add version information to help text. """
-        help_string = "version: {}\n".format(str(self.version)) \
-            if self.version is not None else ""
+        help_string = (
+            "version: {}\n".format(str(self.version))
+            if self.version is not None
+            else ""
+        )
         return help_string + super(VersionInHelpParser, self).format_help()
 
     def subparsers(self):
@@ -34,8 +44,7 @@ class VersionInHelpParser(ArgumentParser):
         """
         subs = [a for a in self._actions if isinstance(a, _SubParsersAction)]
         if len(subs) != 1:
-            raise ValueError(
-                "Expected exactly 1 subparser, got {}".format(len(subs)))
+            raise ValueError("Expected exactly 1 subparser, got {}".format(len(subs)))
         return subs[0]
 
     def top_level_args(self):
@@ -73,10 +82,16 @@ class VersionInHelpParser(ArgumentParser):
             return dest_list
 
         if subcommand is not None and subcommand not in self.subcommands():
-            raise ValueError("'{}' not found in this parser commands: {}".
-                             format(subcommand, str(self.subcommands())))
-        subs = self.subparsers().choices if subcommand is None \
+            raise ValueError(
+                "'{}' not found in this parser commands: {}".format(
+                    subcommand, str(self.subcommands())
+                )
+            )
+        subs = (
+            self.subparsers().choices
+            if subcommand is None
             else {subcommand: self.subparsers().choices[subcommand]}
+        )
         dests = {}
         for subcmd, sub in subs.items():
             dest_list = []
@@ -121,10 +136,16 @@ class VersionInHelpParser(ArgumentParser):
             return defaults_dict
 
         if subcommand is not None and subcommand not in self.subcommands():
-            raise ValueError("'{}' not found in this parser commands: {}".
-                             format(subcommand, str(self.subcommands())))
-        subs = self.subparsers().choices if subcommand is None \
+            raise ValueError(
+                "'{}' not found in this parser commands: {}".format(
+                    subcommand, str(self.subcommands())
+                )
+            )
+        subs = (
+            self.subparsers().choices
+            if subcommand is None
             else {subcommand: self.subparsers().choices[subcommand]}
+        )
         defaults = {}
         for subcmd, sub in subs.items():
             defaults_dict = {}
@@ -159,8 +180,7 @@ def build_cli_extra(optargs):
 
     def render(k, v):
         if not isinstance(k, str):
-            raise TypeError(
-                "Option name isn't a string: {} ({})".format(k, type(k)))
+            raise TypeError("Option name isn't a string: {} ({})".format(k, type(k)))
         if v is None:
             return k
         if is_collection_like(v):
@@ -183,12 +203,16 @@ def query_yes_no(question, default="no"):
     :param str default: the presumed answer if the user just hits <Enter>.
     :return bool: True for "yes" or False for "no"
     """
+
     def parse(ans):
-        return {"yes": True, "y": True, "ye": True,
-                "no": False, "n": False}[ans.lower()]
+        return {"yes": True, "y": True, "ye": True, "no": False, "n": False}[
+            ans.lower()
+        ]
+
     try:
-        prompt = {None: "[y/n]", "yes": "[Y/n]",
-                  "no": "[y/N]"}[None if default is None else default.lower()]
+        prompt = {None: "[y/n]", "yes": "[Y/n]", "no": "[y/N]"}[
+            None if default is None else default.lower()
+        ]
     except (AttributeError, KeyError):
         raise ValueError("invalid default answer: {}".format(default))
     msg = "{q} {p} ".format(q=question, p=prompt)
@@ -197,8 +221,7 @@ def query_yes_no(question, default="no"):
         try:
             return parse(_read_from_user() or default)
         except KeyError:
-            sys.stdout.write(
-                "Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
+            sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
 def convert_value(val):
@@ -214,17 +237,19 @@ def convert_value(val):
         try:
             val = str(val)
         except:
-            raise ValueError("The input has to be of type convertible to 'str',"
-                             " got '{}'".format(type(val)))
+            raise ValueError(
+                "The input has to be of type convertible to 'str',"
+                " got '{}'".format(type(val))
+            )
 
     if isinstance(val, bool):
         return val
     if isinstance(val, str):
-        if val == 'None':
+        if val == "None":
             return None
-        if val.lower() == 'true':
+        if val.lower() == "true":
             return True
-        if val.lower() == 'false':
+        if val.lower() == "false":
             return False
         try:
             float(val)
@@ -241,7 +266,9 @@ def convert_value(val):
 
 def _read_from_user():
     import sys
+
     if sys.version_info.major < 3:
         from __builtin__ import raw_input
+
         return raw_input()
     return input()
