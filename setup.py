@@ -15,16 +15,9 @@ def read_reqs(reqs_name):
 with open(os.path.join(PKG, "_version.py"), "r") as versionfile:
     version = versionfile.readline().split()[-1].strip("\"'\n")
 
-# Handle the pypi README (long description) formatting.
-try:
-    import pypandoc
-
-    long_description = pypandoc.convert_file("README.md", "rst")
-    print("Pandoc conversion succeeded")
-except (IOError, ImportError, OSError):
-    print("Warning: pandoc conversion failed!")
-    long_description = open("README.md").read()
-
+with open("README.md") as f:
+    long_description = f.read()
+    
 setup(
     name=PKG,
     packages=[PKG],
