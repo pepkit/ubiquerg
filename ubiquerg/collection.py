@@ -3,6 +3,7 @@
 import itertools
 import sys
 from warnings import warn
+
 if sys.version_info < (3, 3):
     from collections import Iterable
 else:
@@ -12,17 +13,43 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
-__all__ = ["is_collection_like", "powerset", "asciify_dict"]
+__all__ = ["is_collection_like", "powerset", "asciify_dict", "merge_dicts"]
+
+
+def merge_dicts(x, y):
+    """
+    Merge dictionaries
+
+    :param Mapping x: dict to merge
+    :param Mapping y: dict to merge
+    :return Mapping: merged dict
+    """
+    z = x.copy()
+    z.update(y)
+    return z
 
 
 def is_collection_like(c):
     """
+
     Determine whether an object is collection-like.
 
     :param object c: Object to test as collection
     :return bool: Whether the argument is a (non-string) collection
     """
     return isinstance(c, Iterable) and not isinstance(c, str)
+
+
+def uniqify(seq):  # Dave Kirby
+    """
+    Return only unique items in a sequence, preserving order
+
+    :param list seq: List of items to uniqify
+    :return list[object]: Original list with duplicates removed
+    """
+    # Order preserving
+    seen = set()
+    return [x for x in seq if x not in seen and not seen.add(x)]
 
 
 def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
@@ -46,11 +73,15 @@ def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
         min_items = 1 if nonempty else 0
     else:
         if not isinstance(min_items, int):
-            raise TypeError("Min items count for each subset isn't an integer: "
-                            "{} ({})".format(min_items, type(min_items)))
+            raise TypeError(
+                "Min items count for each subset isn't an integer: "
+                "{} ({})".format(min_items, type(min_items))
+            )
         if nonempty and min_items < 1:
-            raise ValueError("When minimum item count is {}, nonempty subsets "
-                             "cannot be guaranteed.".format(min_items))
+            raise ValueError(
+                "When minimum item count is {}, nonempty subsets "
+                "cannot be guaranteed.".format(min_items)
+            )
     # Account for iterable burn possibility; besides, collection should be
     # relatively small if building the powerset.
     items = list(items)
@@ -58,9 +89,11 @@ def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
     if n == 0 or n < min_items:
         return []
     max_items = len(items) + 1 if include_full_pop else len(items)
-    return list(itertools.chain.from_iterable(
-            itertools.combinations(items, k)
-            for k in range(min_items, max_items)))
+    return list(
+        itertools.chain.from_iterable(
+            itertools.combinations(items, k) for k in range(min_items, max_items)
+        )
+    )
 
 
 def asciify_dict(data):
@@ -70,7 +103,7 @@ def asciify_dict(data):
         ret = []
         for item in lst:
             if isinstance(item, unicode):
-                item = item.encode('utf-8')
+                item = item.encode("utf-8")
             elif isinstance(item, list):
                 item = _asciify_list(item)
             elif isinstance(item, dict):
@@ -85,9 +118,9 @@ def asciify_dict(data):
     ret = {}
     for key, value in data.iteritems():
         if isinstance(key, unicode):
-            key = key.encode('utf-8')
+            key = key.encode("utf-8")
         if isinstance(value, unicode):
-            value = value.encode('utf-8')
+            value = value.encode("utf-8")
         elif isinstance(value, list):
             value = _asciify_list(value)
         elif isinstance(value, dict):

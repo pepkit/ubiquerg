@@ -8,29 +8,23 @@ REQDIR = "requirements"
 
 def read_reqs(reqs_name):
     depsfile = os.path.join(REQDIR, "requirements-{}.txt".format(reqs_name))
-    with open(depsfile, 'r') as f:
+    with open(depsfile, "r") as f:
         return [l.strip() for l in f if l.strip()]
 
 
-with open(os.path.join(PKG, "_version.py"), 'r') as versionfile:
+with open(os.path.join(PKG, "_version.py"), "r") as versionfile:
     version = versionfile.readline().split()[-1].strip("\"'\n")
 
-# Handle the pypi README (long description) formatting.
-try:
-    import pypandoc
-    long_description = pypandoc.convert_file("README.md", 'rst')
-    print("Pandoc conversion succeeded")
-except(IOError, ImportError, OSError):
-    print("Warning: pandoc conversion failed!")
-    long_description = open("README.md").read()
-
+with open("README.md") as f:
+    long_description = f.read()
+    
 setup(
     name=PKG,
     packages=[PKG],
     version=version,
     description="Various utility functions",
     long_description=long_description,
-    long_description_content_type='text/markdown', 
+    long_description_content_type="text/markdown",
     classifiers=[
         "Development Status :: 4 - Beta",
         "License :: OSI Approved :: BSD License",
@@ -46,5 +40,7 @@ setup(
     include_package_data=True,
     test_suite="tests",
     tests_require=read_reqs("dev"),
-    setup_requires=(["pytest-runner"] if {"test", "pytest", "ptr"} & set(sys.argv) else []),
+    setup_requires=(
+        ["pytest-runner"] if {"test", "pytest", "ptr"} & set(sys.argv) else []
+    ),
 )

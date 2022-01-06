@@ -10,12 +10,14 @@ __all__ = ["TmpEnv"]
 
 class TmpEnv(object):
     """ Temporary environment variable setting. """
+
     def __init__(self, overwrite=False, **kwargs):
         if not overwrite:
             already_set = [k for k, v in kwargs.items() if os.getenv(k, v) != v]
             if already_set:
-                msg = "{} variable(s) already set: {}".\
-                    format(len(already_set), ", ".join(already_set))
+                msg = "{} variable(s) already set: {}".format(
+                    len(already_set), ", ".join(already_set)
+                )
                 raise ValueError(msg)
         self._kvs = kwargs
 

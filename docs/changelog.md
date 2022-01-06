@@ -1,9 +1,52 @@
 # Changelog
 
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
+
+## [0.6.2] - 2021-01-28
+
+### Fixed 
+- `is_url` function; [Issue 32](https://github.com/pepkit/ubiquerg/issues/32)
+
+## [0.6.1] - 2020-07-01
+
+### Changed
+- file locking enhancements
+
+## [0.6.0] - 2020-06-23
+
+### Added
+- file locking utilities:
+    - `create_lock`
+    - `remove_lock`
+    - `make_lock_path`
+    - `create_file_racefree`
+    - `wait_for_lock`
+    
+## [0.5.2] - 2020-05-15
+### Changed
+- in `size` function, if a file is not found a warning is issued, instead of a message
+
+### Added
+- `VersionInHelpParser` methods characterizing the instance: 
+    - `arg_defaults`
+    - `dests_by_subparser`
+    - `subcommands`
+    - `top_level_args`
+    - `subparsers`
+
+## [0.5.1] - 2020-03-30
+### Added
+- `uniqify` function
+- support for collection of paths in `size` function
+
+### Fixed
+- path expansion issues; [Issue #24](https://github.com/pepkit/ubiquerg/issues/24)
+
+### Changed
+  
 ## [0.5.0] - 2019-10-17
 ### Added
 - add `asciify_dict` function
-
 
 ## [0.4.9] - 2019-09-17
 ### Added
