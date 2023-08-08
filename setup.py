@@ -17,7 +17,7 @@ with open(os.path.join(PKG, "_version.py"), "r") as versionfile:
 
 with open("README.md") as f:
     long_description = f.read()
-    
+
 setup(
     name=PKG,
     packages=[PKG],
@@ -34,7 +34,7 @@ setup(
     ],
     keywords="utility, utilities, tools",
     url="https://github.com/pepkit/{}/".format(PKG),
-    author=u"Vince Reuter",
+    author="Vince Reuter",
     license="BSD-2-Clause",
     scripts=None,
     include_package_data=True,

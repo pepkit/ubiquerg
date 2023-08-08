@@ -9,7 +9,7 @@ __all__ = ["TmpEnv"]
 
 
 class TmpEnv(object):
-    """ Temporary environment variable setting. """
+    """Temporary environment variable setting."""
 
     def __init__(self, overwrite=False, **kwargs):
         if not overwrite:

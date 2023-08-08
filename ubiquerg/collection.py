@@ -97,7 +97,7 @@ def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
 
 
 def asciify_dict(data):
-    """ https://gist.github.com/chris-hailstorm/4989643 """
+    """https://gist.github.com/chris-hailstorm/4989643"""
 
     def _asciify_list(lst):
         ret = []
