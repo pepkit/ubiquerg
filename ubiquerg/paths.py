@@ -2,11 +2,10 @@
 
 import os
 import re
+from typing import List, Tuple, Any, Union
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
-
-__all__ = ["expandpath", "parse_registry_path", "mkabs"]
 
 
 def expandpath(path):
@@ -20,15 +19,15 @@ def expandpath(path):
 
 
 def parse_registry_path(
-    rpstring,
-    defaults=[
+    rpstring: str,
+    defaults: List[Tuple[str, Any]] = [
         ("protocol", None),
         ("namespace", None),
         ("item", None),
         ("subitem", None),
         ("tag", None),
     ],
-):
+) -> Union[dict, None]:
     """
     Parse a 'registry path' string into components.
 
@@ -47,7 +46,7 @@ def parse_registry_path(
     # This commented regex is the same without protocol
     # ^(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$
     # regex = "^(?:([0-9a-zA-Z_-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$"
-    regex = "^(?:([0-9a-zA-Z_-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?:\.([0-9a-zA-Z_-]+))?(?::([0-9a-zA-Z_.,|+()-]+))?$"
+    regex = "^(?:([0-9a-zA-Z._-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?:\.([0-9a-zA-Z_-]+))?(?::([0-9a-zA-Z_.,|+()-]+))?$"
     # This regex matches strings like:
     # protocol://namespace/item:tag
     # or: protocol::namespace/item:tag

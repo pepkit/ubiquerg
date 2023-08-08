@@ -74,3 +74,23 @@ def test_parse_reg():
     pvars = parse_registry_path("abc")
     assert(pvars['item'] == 'abc')
     assert(parse_registry_path("http://big.databio.org/bulker/bulker/demo.yaml") == None)
+
+@pytest.mark.parametrize(
+    "registry_path, output",
+    [
+        (
+            "example.protocol::namespace1/project1:this_is_tag",
+            {
+                "protocol": "example.protocol",
+                "namespace": "namespace1",
+                "item": "project1",
+                "subitem": None,
+                "tag": "this_is_tag",
+            },
+        )
+    ],
+)
+def test_registry_path(registry_path, output):
+    pvars = parse_registry_path(registry_path)
+    assert pvars == output
+
