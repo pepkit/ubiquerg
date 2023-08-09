@@ -28,7 +28,7 @@ class VersionInHelpParser(ArgumentParser):
             )
 
     def format_help(self):
-        """ Add version information to help text. """
+        """Add version information to help text."""
         help_string = (
             "version: {}\n".format(str(self.version))
             if self.version is not None

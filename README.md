@@ -20,5 +20,3 @@ Ubiquerg is a utility package with a collection of helpful universally useful fu
 - Functions should be generic. They should perform basic, low-level processing that is not specific to a particular application.
 - Functions should only be added to ubiquerg if they are used in at least 2 existing modules.
 - Functions should be kept relatively small and simple (ideally <50 lines of code).
-
-
