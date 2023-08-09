@@ -1,7 +1,7 @@
 # ubiquerg
 
 ![Run pytests](https://github.com/pepkit/ubiquerg/workflows/Run%20pytests/badge.svg)
-[![codecov](https://codecov.io/gh/pepkit/ubiquerg/branch/master/graph/badge.svg?token=OTQI41RFFA)](https://codecov.io/gh/pepkit/ubiquerg)
+[![codecov](https://codecov.io/gh/pepkit/ubiquerg/branch/master/graph/badge.svg)](https://codecov.io/gh/pepkit/ubiquerg)
 [![PEP compatible](https://pepkit.github.io/img/PEP-compatible-green.svg)](https://pepkit.github.io)
 
 Ubiquerg is a utility package with a collection of helpful universally useful functions. The name means work (erg) everywhere (ubique), indicating our intention for these to be low-level functions that can be used in lots of different places. Functions are divided into groups, including:

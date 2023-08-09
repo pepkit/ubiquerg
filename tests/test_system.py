@@ -12,6 +12,7 @@ __email__ = "vreuter@virginia.edu"
 EXTENSIONS = [
     ".py",
     ".rb",
+    ".rs",
     ".sh",
     ".java",
     ".jar",
