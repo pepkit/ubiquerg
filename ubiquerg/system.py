@@ -28,7 +28,12 @@ def is_command_callable(cmd):
         return False
     if os.name == "nt":
         try:
-            subprocess.run(["where", cmd], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(
+                ["where", cmd],
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
             return True
         except subprocess.CalledProcessError:
             return False
