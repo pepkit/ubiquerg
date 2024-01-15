@@ -1,6 +1,7 @@
 """ System utility functions """
 
 import os
+import subprocess
 
 __author__ = "Databio Lab"
 __email__ = "nathan@code.databio.org"
@@ -25,9 +26,16 @@ def is_command_callable(cmd):
         raise ValueError("Empty command to check for callability")
     if os.path.isdir(cmd) or (os.path.isfile(cmd) and not os.access(cmd, os.X_OK)):
         return False
-    # Use `command` to see if command is callable, and rule on exit code.
-    check = "command -v {0} >/dev/null 2>&1 || {{ exit 1; }}".format(cmd)
-    return not bool(os.system(check))
+    if os.name == "nt":
+        try:
+            subprocess.run(["where", cmd], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            return True
+        except subprocess.CalledProcessError:
+            return False
+    else:
+        # Use `command` to see if command is callable, and rule on exit code.
+        check = "command -v {0} >/dev/null 2>&1 || {{ exit 1; }}".format(cmd)
+        return not bool(os.system(check))
 
 
 def is_writable(folder, check_exist=False, create=False):
