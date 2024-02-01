@@ -296,7 +296,7 @@ def _create_lock(lock_path, filepath, wait_max) -> None:
             # last lock existence check,
             # wait for the lock file to be gone, but no longer than
             # `wait_max`.
-            print(
+            _LOGGER.info(
                 "The lock has been created in the split second since the "
                 "last lock existence check. Waiting"
             )

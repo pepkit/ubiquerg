@@ -73,7 +73,7 @@ def _generate_too_few_items(minsize, maxsize, pool):
     if not (isinstance(minsize, int) and isinstance(maxsize, int)):
         raise TypeError("Size bounds must be integers; got {}".format(print_bound()))
     if maxsize < minsize:
-        raise ValueError("Nonesense size bounds: {}".format(print_bound()))
+        raise ValueError("Nonsense size bounds: {}".format(print_bound()))
     n = random.randint(minsize, maxsize)
     return n, random.sample(pool, max(n - 1, 0))
 

@@ -75,7 +75,7 @@ def size(path, size_str=True):
                     s += os.lstat(fp).st_size
                     symlinks.append(fp)
         if len(symlinks) > 0:
-            print(
+            _LOGGER.info(
                 "{} symlinks were found: {}".format(len(symlinks), "\n".join(symlinks))
             )
     else:
@@ -125,7 +125,7 @@ def get_file_mod_time(pth):
     try:
         return os.path.getmtime(pth)
     except Exception as e:
-        print(
+        _LOGGER.info(
             "Could not determine timestamp for '{}'. Returning current time. "
             "Caught exception: {}".format(pth, getattr(e, "message", repr(e)))
         )
@@ -174,7 +174,6 @@ def wait_for_lock(lock_file, wait_max=30):
                 )
     if first_message_flag:
         _LOGGER.info(f" File unlocked: {os.path.basename(lock_file)}")
-        # print(f" File unlocked: {os.path.basename(lock_file)}")
 
 
 def create_file_racefree(file):
@@ -243,7 +242,7 @@ def _create_lock(lock_path, filepath, wait_max):
             # last lock existence check,
             # wait for the lock file to be gone, but no longer than
             # `wait_max`.
-            print(
+            _LOGGER.info(
                 "The lock has been created in the split second since the "
                 "last lock existence check. Waiting"
             )
