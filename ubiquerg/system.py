@@ -26,6 +26,7 @@ def is_command_callable(cmd):
         raise ValueError("Empty command to check for callability")
     if os.path.isdir(cmd) or (os.path.isfile(cmd) and not os.access(cmd, os.X_OK)):
         return False
+    # if system is windows run this command:
     if os.name == "nt":
         try:
             subprocess.run(
