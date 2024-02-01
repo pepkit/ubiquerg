@@ -2,12 +2,16 @@
 
 import os
 import sys
+import logging
 import errno
 import time
 
 from warnings import warn
 from tarfile import open as topen
 from hashlib import md5
+
+_LOGGER = logging.getLogger(__name__)
+
 
 __all__ = [
     "checksum",
@@ -144,7 +148,8 @@ def wait_for_lock(lock_file, wait_max=30):
         ori_timestamp = get_file_mod_time(lock_file)
     while os.path.isfile(lock_file):
         if first_message_flag is False:
-            sys.stdout.write("Waiting for file lock: {} ".format(lock_file))
+            _LOGGER.info(f"Waiting for file lock: {os.path.basename(lock_file)}")
+            # sys.stdout.write("Waiting for file lock: {} ".format(os.path.basename(lock_file)))
             first_message_flag = True
         else:
             sys.stdout.write(".")
@@ -168,7 +173,8 @@ def wait_for_lock(lock_file, wait_max=30):
                     "file still exists.".format(wait_max)
                 )
     if first_message_flag:
-        print(" File unlocked")
+        _LOGGER.info(f" File unlocked: {os.path.basename(lock_file)}")
+        # print(f" File unlocked: {os.path.basename(lock_file)}")
 
 
 def create_file_racefree(file):

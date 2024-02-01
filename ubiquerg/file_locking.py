@@ -1,3 +1,4 @@
+import errno
 import glob
 import logging
 import os
@@ -280,7 +281,8 @@ def ensure_write_access(lock_path, strict_ro_locks=False):
 
 
 def _create_lock(lock_path, filepath, wait_max) -> None:
-    _LOGGER.debug(f"Creating lock for {filepath} at {lock_path}")
+    # _LOGGER.debug(f"Creating lock for {filepath} at {lock_path}")
+    _LOGGER.debug(f"Creating lock at {os.path.basename(lock_path)}")
     try:
         create_file_racefree(lock_path)
     except FileNotFoundError:
@@ -312,7 +314,7 @@ def _remove_lock(lock_path) -> bool:
         Not the path to the lock!
     :return bool: whether the lock was found and removed
     """
-    _LOGGER.debug(f"Removing lock at {lock_path}")
+    _LOGGER.debug(f"Removing lock at {os.path.basename(lock_path)}")
     if os.path.exists(lock_path):
         os.remove(lock_path)
         return True
