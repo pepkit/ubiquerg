@@ -46,7 +46,7 @@ def parse_registry_path(
     # This commented regex is the same without protocol
     # ^(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$
     # regex = "^(?:([0-9a-zA-Z_-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$"
-    regex = "^(?:([0-9a-zA-Z._-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?:\.([0-9a-zA-Z_-]+))?(?::([0-9a-zA-Z_.,|+()-]+))?$"
+    regex = r"^(?:([0-9a-zA-Z._-]+)(?:::|:\/\/))?(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?:\.([0-9a-zA-Z_-]+))?(?::([0-9a-zA-Z_.,|+()-]+))?$"
     # This regex matches strings like:
     # protocol://namespace/item:tag
     # or: protocol::namespace/item:tag
