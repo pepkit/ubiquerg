@@ -68,3 +68,4 @@ Thumbs.db
 docs/autodoc_build
 dist/
 ubiquerg.egg-info/
+build/
