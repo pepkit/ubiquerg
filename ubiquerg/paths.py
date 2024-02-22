@@ -94,6 +94,12 @@ def mkabs(path, reldir=None):
     def xpand(path):
         return os.path.expandvars(os.path.expanduser(path))
 
+    if path is None:
+        return path
+
+    if is_url(path):
+        return path
+
     if os.path.isabs(xpand(path)):
         return xpand(path)
 
