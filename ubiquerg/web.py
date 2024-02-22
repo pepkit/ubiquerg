@@ -23,4 +23,4 @@ def is_url(maybe_url):
         r"(?:/?|[/?]\S+)$",
         re.IGNORECASE,
     )
-    return re.match(regex, maybe_url) is not None
+    return re.match(regex, str(maybe_url)) is not None
