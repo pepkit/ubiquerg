@@ -2,7 +2,10 @@
 
 import os
 import re
+
 from typing import List, Tuple, Any, Union
+
+from .web import is_url
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
