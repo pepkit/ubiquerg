@@ -1,7 +1,7 @@
 """ Tests for binary user terminal interaction """
 
 import itertools
-import mock
+import unittest.mock as mock
 
 import pytest
 from ubiquerg import query_yes_no
