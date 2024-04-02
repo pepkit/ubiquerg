@@ -81,7 +81,7 @@ def parse_registry_path(
     return parsed_identifier
 
 
-def mkabs(path:str, reldir:str =None) -> str:
+def mkabs(path: str, reldir: str = None) -> str:
     """
     Makes sure a path is absolute; if not already absolute, it's made absolute
     relative to a given directory (or file). Also expands ~ and environment variables for
