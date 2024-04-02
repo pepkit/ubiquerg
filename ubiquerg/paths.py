@@ -2,7 +2,10 @@
 
 import os
 import re
+
 from typing import List, Tuple, Any, Union
+
+from .web import is_url
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -78,10 +81,10 @@ def parse_registry_path(
     return parsed_identifier
 
 
-def mkabs(path, reldir=None):
+def mkabs(path: str, reldir: str = None) -> str:
     """
     Makes sure a path is absolute; if not already absolute, it's made absolute
-    relative to a given directory. Also expands ~ and environment variables for
+    relative to a given directory (or file). Also expands ~ and environment variables for
     kicks.
 
     :param str path: Path to make absolute
@@ -94,10 +97,19 @@ def mkabs(path, reldir=None):
     def xpand(path):
         return os.path.expandvars(os.path.expanduser(path))
 
+    if path is None:
+        return path
+
+    if is_url(path):
+        return path
+
     if os.path.isabs(xpand(path)):
         return xpand(path)
 
     if not reldir:
         return os.path.abspath(xpand(path))
 
-    return os.path.join(xpand(reldir), xpand(path))
+    if os.path.isdir(reldir):
+        return os.path.join(xpand(reldir), xpand(path))
+    else:
+        return os.path.join(xpand(os.path.dirname(reldir)), xpand(path))

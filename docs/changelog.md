@@ -2,10 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
 
+## [0.8.0] - 2024-04-02
+### Changed
+- Expanded `mkabs` function to handle more cases
+- Allow `is_url` to work on Path objects
+- Remove `mock` test requirement in favor of importing `unittest.mock as mock`
+
 ## [0.7.0] - 2024-01-02
 
 ### Added
 - Experimental support for three-locking.
+
 
 ## [0.6.3] - 2023-08-08
 ### Fixed 

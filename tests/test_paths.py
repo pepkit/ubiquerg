@@ -2,7 +2,7 @@
 
 import os
 import pytest
-from ubiquerg import expandpath, parse_registry_path
+from ubiquerg import expandpath, parse_registry_path, mkabs
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -106,3 +106,12 @@ def test_parse_reg():
 def test_registry_path(registry_path, output):
     pvars = parse_registry_path(registry_path)
     assert pvars == output
+
+
+def test_mkabs():
+    relpath = "abc.txt"
+    abspath = mkabs(relpath)
+    print(f"Abspath: {abspath}")
+    assert abspath == os.path.join(os.getcwd(), relpath)
+    url = "http://example.com"
+    assert mkabs(url) == url
