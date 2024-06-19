@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
 
+## [0.8.1a1] - 2024-xx-xx
+
+### Added
+- Ported deep_update from yacman
+
 ## [0.8.0] - 2024-04-02
 ### Changed
 - Expanded `mkabs` function to handle more cases

@@ -7,7 +7,7 @@ from warnings import warn
 if sys.version_info < (3, 3):
     from collections import Iterable
 else:
-    from collections.abc import Iterable
+    from collections.abc import Iterable, Mapping
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -27,6 +27,18 @@ def merge_dicts(x, y):
     z = x.copy()
     z.update(y)
     return z
+
+
+def deep_update(old, new):
+    """
+    Recursively update nested dict, modifying source
+    """
+    for key, value in new.items():
+        if isinstance(value, Mapping) and value:
+            old[key] = deep_update(old.get(key, {}), value)
+        else:
+            old[key] = new[key]
+    return old
 
 
 def is_collection_like(c):
