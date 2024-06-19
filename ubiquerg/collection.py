@@ -13,7 +13,7 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
-__all__ = ["is_collection_like", "powerset", "asciify_dict", "merge_dicts"]
+__all__ = ["is_collection_like", "powerset", "asciify_dict", "merge_dicts", "deep_update"]
 
 
 def merge_dicts(x, y):
