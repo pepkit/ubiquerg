@@ -1,4 +1,4 @@
-""" Tests for system tools """
+"""Tests for system tools"""
 
 import os
 import subprocess

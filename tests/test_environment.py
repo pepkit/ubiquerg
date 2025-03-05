@@ -1,4 +1,4 @@
-""" Tests for environment-related functionality """
+"""Tests for environment-related functionality"""
 
 import os
 import pytest

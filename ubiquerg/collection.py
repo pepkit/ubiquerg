@@ -1,4 +1,4 @@
-""" Tools for working with collections """
+"""Tools for working with collections"""
 
 import itertools
 import sys

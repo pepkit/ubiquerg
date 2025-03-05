@@ -1,4 +1,4 @@
-""" System utility functions """
+"""System utility functions"""
 
 import os
 import subprocess

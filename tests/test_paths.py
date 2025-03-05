@@ -1,4 +1,4 @@
-""" Tests for filesystem utilities """
+"""Tests for filesystem utilities"""
 
 import os
 import pytest

@@ -1,4 +1,4 @@
-""" Tests for binary user terminal interaction """
+"""Tests for binary user terminal interaction"""
 
 import itertools
 import unittest.mock as mock

@@ -1,4 +1,4 @@
-""" Tests for rendering CLI options and arguments """
+"""Tests for rendering CLI options and arguments"""
 
 from collections import OrderedDict
 import pytest

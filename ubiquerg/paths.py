@@ -1,4 +1,4 @@
-""" Filesystem utility functions """
+"""Filesystem utility functions"""
 
 import os
 import re

@@ -1,4 +1,4 @@
-""" Tests for checksum """
+"""Tests for checksum"""
 
 import hashlib
 import os

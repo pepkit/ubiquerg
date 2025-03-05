@@ -1,4 +1,4 @@
-""" Environment-related utilities """
+"""Environment-related utilities"""
 
 import os
 

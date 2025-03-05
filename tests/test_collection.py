@@ -1,4 +1,4 @@
-""" Tests for collection utilities """
+"""Tests for collection utilities"""
 
 from collections import Counter, OrderedDict
 import itertools

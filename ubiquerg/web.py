@@ -1,4 +1,4 @@
-""" Web-related utilities """
+"""Web-related utilities"""
 
 import re
 

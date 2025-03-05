@@ -1,4 +1,4 @@
-""" Functions for working with command-line interaction """
+"""Functions for working with command-line interaction"""
 
 from .collection import is_collection_like, merge_dicts
 from argparse import (

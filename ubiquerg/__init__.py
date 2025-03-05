@@ -1,4 +1,4 @@
-""" Package exports """
+"""Package exports"""
 
 from .cli_tools import *
 from .collection import *
