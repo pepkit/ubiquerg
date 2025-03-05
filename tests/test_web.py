@@ -1,4 +1,4 @@
-""" Tests for web """
+"""Tests for web"""
 
 import pytest
 from ubiquerg.web import is_url

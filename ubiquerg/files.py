@@ -1,4 +1,4 @@
-""" Functions facilitating file operations """
+"""Functions facilitating file operations"""
 
 import os
 import sys
