@@ -12,11 +12,13 @@ __email__ = "vreuter@virginia.edu"
 
 
 def expandpath(path):
-    """
-    Expand a filesystem path that may or may not contain user/env vars.
+    """Expand a filesystem path that may or may not contain user/env vars.
 
-    :param str path: path to expand
-    :return str: expanded version of input path
+    Args:
+        path: path to expand
+
+    Returns:
+        str: expanded version of input path
     """
     return os.path.expandvars(os.path.expanduser(path))
 
@@ -31,8 +33,7 @@ def parse_registry_path(
         ("tag", None),
     ],
 ) -> Union[dict, None]:
-    """
-    Parse a 'registry path' string into components.
+    """Parse a 'registry path' string into components.
 
     A registry path is a string that is kind of like a URL, providing a unique
     identifier for a particular asset, like
@@ -40,10 +41,12 @@ def parse_registry_path(
     change the names of the entries in the return dict, and to provide defaults
     in case of missing values.
 
-    :param str rpstring: string to parse
-    :param list defaults: A list of 5 tuples with name of the 5 entries, and a
-        default value in case it is missing (can be 'None')
-    :return dict: dict with one element for each parsed entry in the path
+    Args:
+        rpstring: string to parse
+        defaults: A list of 5 tuples with name of the 5 entries, and a default value in case it is missing (can be 'None')
+
+    Returns:
+        dict | None: dict with one element for each parsed entry in the path
     """
 
     # This commented regex is the same without protocol
@@ -82,16 +85,17 @@ def parse_registry_path(
 
 
 def mkabs(path: str, reldir: str = None) -> str:
-    """
-    Makes sure a path is absolute; if not already absolute, it's made absolute
-    relative to a given directory (or file). Also expands ~ and environment variables for
-    kicks.
+    """Make sure a path is absolute.
 
-    :param str path: Path to make absolute
-    :param str reldir: Relative directory to make path absolute from if it's
-        not already absolute
+    If not already absolute, it's made absolute relative to a given directory (or file).
+    Also expands ~ and environment variables for kicks.
 
-    :return str: Absolute path
+    Args:
+        path: Path to make absolute
+        reldir: Relative directory to make path absolute from if it's not already absolute
+
+    Returns:
+        str: Absolute path
     """
 
     def xpand(path):

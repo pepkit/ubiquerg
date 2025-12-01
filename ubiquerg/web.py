@@ -6,11 +6,13 @@ __all__ = ["is_url"]
 
 
 def is_url(maybe_url):
-    """
-    Determine whether a path is a URL.
+    """Determine whether a path is a URL.
 
-    :param str maybe_url: path to investigate as URL
-    :return bool: whether path appears to be a URL
+    Args:
+        maybe_url: path to investigate as URL
+
+    Returns:
+        bool: whether path appears to be a URL
     """
     # from Django 1.3.x
     # https://github.com/django/django/blob/6726d750979a7c29e0dd866b4ea367eef7c8a420/django/core/validators.py#L45-L51

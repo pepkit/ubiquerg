@@ -29,12 +29,14 @@ LOCK_PREFIX = "lock."
 
 
 def checksum(path, blocksize=int(2e9)):
-    """
-    Generate a md5 checksum for the file contents in the provided path.
+    """Generate a md5 checksum for the file contents in the provided path.
 
-    :param str path: path to file for which to generate checksum
-    :param int blocksize: number of bytes to read per iteration, default: 2GB
-    :return str: checksum hash
+    Args:
+        path: path to file for which to generate checksum
+        blocksize: number of bytes to read per iteration, default: 2GB
+
+    Returns:
+        str: checksum hash
     """
     m = md5()
     with open(path, "rb") as f:
@@ -47,14 +49,14 @@ def checksum(path, blocksize=int(2e9)):
 
 
 def size(path, size_str=True):
-    """
-    Gets the size of a file or directory or list of them in the provided path
+    """Get the size of a file or directory or list of them in the provided path.
 
-    :param str|list path: path or list of paths to the file or directories
-        to check size of
-    :param bool size_str: whether the size should be converted to a
-        human-readable string, e.g. convert B to MB
-    :return int|str: file size or file size string
+    Args:
+        path: path or list of paths to the file or directories to check size of
+        size_str: whether the size should be converted to a human-readable string, e.g. convert B to MB
+
+    Returns:
+        int | str: file size or file size string
     """
 
     if isinstance(path, list):
@@ -85,11 +87,13 @@ def size(path, size_str=True):
 
 
 def filesize_to_str(size):
-    """
-    Converts the numeric bytes to the size string
+    """Convert the numeric bytes to the size string.
 
-    :param int|float size: file size to convert
-    :return str: file size string
+    Args:
+        size: file size to convert
+
+    Returns:
+        str: file size string
     """
     if isinstance(size, (int, float)):
         for unit in FILE_SIZE_UNITS:
@@ -103,24 +107,29 @@ def filesize_to_str(size):
 
 
 def untar(src, dst):
-    """
-    Unpack a path to a target folder.
-    All the required directories will be created
+    """Unpack a path to a target folder.
 
-    :param str src: path to unpack
-    :param str dst: path to output folder
+    All the required directories will be created.
+
+    Args:
+        src: path to unpack
+        dst: path to output folder
     """
     with topen(src) as tf:
         tf.extractall(path=dst)
 
 
 def get_file_mod_time(pth):
-    """
-    Safely get last modification time for a file. Prevents situation when file
-    is deleted between file existence check and last file modification check.
+    """Safely get last modification time for a file.
 
-    :param str pth: file path to check
-    :return float: number of seconds since Jan 1, 1970 00:00:00
+    Prevents situation when file is deleted between file existence check and
+    last file modification check.
+
+    Args:
+        pth: file path to check
+
+    Returns:
+        float: number of seconds since Jan 1, 1970 00:00:00
     """
     try:
         return os.path.getmtime(pth)
@@ -133,11 +142,11 @@ def get_file_mod_time(pth):
 
 
 def wait_for_lock(lock_file, wait_max=30):
-    """
-    Just sleep until the lock_file does not exist
+    """Just sleep until the lock_file does not exist.
 
-    :param str lock_file: Lock file to wait upon.
-    :param int wait_max: max wait time if the file in question is already locked
+    Args:
+        lock_file: Lock file to wait upon
+        wait_max: max wait time if the file in question is already locked
     """
     sleeptime = 0.001
     first_message_flag = False
@@ -177,15 +186,17 @@ def wait_for_lock(lock_file, wait_max=30):
 
 
 def create_file_racefree(file):
-    """
-    Creates a file, but fails if the file already exists.
+    """Create a file, but fail if the file already exists.
 
     This function will thus only succeed if this process actually creates
     the file; if the file already exists, it will cause an
     OSError, solving race conditions.
 
-    :param str file: File to create.
-    :raise OSError: if the file to be created already exists
+    Args:
+        file: File to create
+
+    Raises:
+        OSError: if the file to be created already exists
     """
     write_lock_flags = os.O_CREAT | os.O_EXCL | os.O_WRONLY
     fd = os.open(file, write_lock_flags)
@@ -194,11 +205,13 @@ def create_file_racefree(file):
 
 
 def make_lock_path(lock_name_base):
-    """
-    Create a collection of path to locks file with given name as bases.
+    """Create a collection of path to locks file with given name as bases.
 
-    :param str | list[str] lock_name_base: Lock file names
-    :return str | list[str]: Path to the lock files.
+    Args:
+        lock_name_base: Lock file names
+
+    Returns:
+        str | list[str]: Path to the lock files
     """
 
     def _mk_lock(lnb):
@@ -214,12 +227,13 @@ def make_lock_path(lock_name_base):
 
 
 def remove_lock(filepath):
-    """
-    Remove lock
+    """Remove lock.
 
-    :param str filepath: path to the file to remove the lock for.
-        Not the path to the lock!
-    :return bool: whether the lock was found and removed
+    Args:
+        filepath: path to the file to remove the lock for. Not the path to the lock!
+
+    Returns:
+        bool: whether the lock was found and removed
     """
     lock = make_lock_path(filepath)
     if os.path.exists(lock):
@@ -253,11 +267,11 @@ def _create_lock(lock_path, filepath, wait_max):
 
 
 def create_lock(filepath, wait_max=10):
-    """
-    Securely create a lock file
+    """Securely create a lock file.
 
-    :param str filepath: path to a file to lock
-    :param int wait_max: max wait time if the file in question is already locked
+    Args:
+        filepath: path to a file to lock
+        wait_max: max wait time if the file in question is already locked
     """
     lock_path = make_lock_path(filepath)
     # wait until no lock is present

@@ -23,12 +23,14 @@ __all__ = [
 
 
 def merge_dicts(x, y):
-    """
-    Merge dictionaries
+    """Merge dictionaries.
 
-    :param Mapping x: dict to merge
-    :param Mapping y: dict to merge
-    :return Mapping: merged dict
+    Args:
+        x: dict to merge
+        y: dict to merge
+
+    Returns:
+        Mapping: merged dict
     """
     z = x.copy()
     z.update(y)
@@ -36,8 +38,14 @@ def merge_dicts(x, y):
 
 
 def deep_update(old, new):
-    """
-    Recursively update nested dict, modifying source
+    """Recursively update nested dict, modifying source.
+
+    Args:
+        old: dict to update
+        new: dict with new values
+
+    Returns:
+        dict: updated dict
     """
     for key, value in new.items():
         if isinstance(value, Mapping) and value:
@@ -48,22 +56,25 @@ def deep_update(old, new):
 
 
 def is_collection_like(c):
-    """
+    """Determine whether an object is collection-like.
 
-    Determine whether an object is collection-like.
+    Args:
+        c: Object to test as collection
 
-    :param object c: Object to test as collection
-    :return bool: Whether the argument is a (non-string) collection
+    Returns:
+        bool: Whether the argument is a (non-string) collection
     """
     return isinstance(c, Iterable) and not isinstance(c, str)
 
 
 def uniqify(seq):  # Dave Kirby
-    """
-    Return only unique items in a sequence, preserving order
+    """Return only unique items in a sequence, preserving order.
 
-    :param list seq: List of items to uniqify
-    :return list[object]: Original list with duplicates removed
+    Args:
+        seq: List of items to uniqify
+
+    Returns:
+        list[object]: Original list with duplicates removed
     """
     # Order preserving
     seen = set()
@@ -71,21 +82,20 @@ def uniqify(seq):  # Dave Kirby
 
 
 def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
-    """
-    Build the powerset of a collection of items.
+    """Build the powerset of a collection of items.
 
-    :param Iterable[object] items: "Pool" of all items, the population for
-        which to build the power set.
-    :param int min_items: Minimum number of individuals from the population
-        to allow in any given subset.
-    :param bool include_full_pop: Whether to include the full population in
-        the powerset (default True to accord with genuine definition)
-    :param bool nonempty: force each subset returned to be nonempty
-    :return list[object]: Sequence of subsets of the population, in
-        nondecreasing size order
-    :raise TypeError: if minimum item count is specified but is not an integer
-    :raise ValueError: if minimum item count is insufficient to guarantee
-        nonempty subsets
+    Args:
+        items: "Pool" of all items, the population for which to build the power set
+        min_items: Minimum number of individuals from the population to allow in any given subset
+        include_full_pop: Whether to include the full population in the powerset (default True to accord with genuine definition)
+        nonempty: force each subset returned to be nonempty
+
+    Returns:
+        list[object]: Sequence of subsets of the population, in nondecreasing size order
+
+    Raises:
+        TypeError: if minimum item count is specified but is not an integer
+        ValueError: if minimum item count is insufficient to guarantee nonempty subsets
     """
     if min_items is None:
         min_items = 1 if nonempty else 0

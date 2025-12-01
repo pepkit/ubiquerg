@@ -16,8 +16,7 @@ __all__ = __classes__ + ["build_cli_extra", "query_yes_no", "convert_value"]
 
 class VersionInHelpParser(ArgumentParser):
     def __init__(self, version=None, **kwargs):
-        """Overwrites the inherited init. Saves the version as an object
-        attribute for further use."""
+        """Overwrites the inherited init. Saves the version as an object attribute for further use."""
         super(VersionInHelpParser, self).__init__(**kwargs)
         self.version = version
         if self.version is not None:
@@ -37,10 +36,10 @@ class VersionInHelpParser(ArgumentParser):
         return help_string + super(VersionInHelpParser, self).format_help()
 
     def subparsers(self):
-        """
-        Get the subparser associated with a parser.
+        """Get the subparser associated with a parser.
 
-        :return argparse._SubparsersAction: action defining the subparsers
+        Returns:
+            argparse._SubparsersAction: action defining the subparsers
         """
         subs = [a for a in self._actions if isinstance(a, _SubParsersAction)]
         if len(subs) != 1:
@@ -48,30 +47,32 @@ class VersionInHelpParser(ArgumentParser):
         return subs[0]
 
     def top_level_args(self):
-        """
-        Get actions not assiated with any subparser.
+        """Get actions not assiated with any subparser.
 
-        Help and version are also excluded
+        Help and version are also excluded.
 
-        :return list[argparse.<action_type>]: list of argument actions
+        Returns:
+            list[argparse.<action_type>]: list of argument actions
         """
         excl = [_SubParsersAction, _HelpAction, _VersionAction]
         return [a for a in self._actions if not type(a) in excl]
 
     def subcommands(self):
-        """
-        Get subcommands defined by a parser.
+        """Get subcommands defined by a parser.
 
-        :return list[str]: subcommands defined within this parser
+        Returns:
+            list[str]: subcommands defined within this parser
         """
         return list(self.subparsers().choices.keys())
 
     def dests_by_subparser(self, subcommand=None, top_level=False):
-        """
-        Get argument dests by subcommand from a parser.
+        """Get argument dests by subcommand from a parser.
 
-        :param str subcommand: subcommand to get dests for
-        :return dict: dests by subcommand
+        Args:
+            subcommand: subcommand to get dests for
+
+        Returns:
+            dict: dests by subcommand
         """
         if top_level:
             top_level_actions = self.top_level_args()
@@ -104,9 +105,9 @@ class VersionInHelpParser(ArgumentParser):
         return dests
 
     def suppress_defaults(self):
-        """
-        Remove parser change defaults to argparse.SUPPRESS so that they do not
-        show up in the argparse.Namespace object after argument parsing.
+        """Remove parser change defaults to argparse.SUPPRESS.
+
+        This prevents them from showing up in the argparse.Namespace object after argument parsing.
         """
         top_level_actions = self.top_level_args()
         for tla in top_level_actions:
@@ -119,13 +120,14 @@ class VersionInHelpParser(ArgumentParser):
                     sa.default = SUPPRESS
 
     def arg_defaults(self, subcommand=None, unique=False, top_level=False):
-        """
-        Get argument defaults by subcommand from a parser.
+        """Get argument defaults by subcommand from a parser.
 
-        :param str subcommand: subcommand to get defaults for
-        :param bool unique: whether only unique flat dict of dests and
-            defaults mapping should be returned
-        :return dict: defaults by subcommand
+        Args:
+            subcommand: subcommand to get defaults for
+            unique: whether only unique flat dict of dests and defaults mapping should be returned
+
+        Returns:
+            dict: defaults by subcommand
         """
         if top_level:
             top_level_actions = self.top_level_args()
@@ -164,18 +166,21 @@ class VersionInHelpParser(ArgumentParser):
 
 
 def build_cli_extra(optargs):
-    """
-    Render CLI options/args as text to add to base command.
+    """Render CLI options/args as text to add to base command.
 
     To specify a flag, map an option to None. Otherwise, map option short or
     long name to value(s). Values that are collection types will be rendered
     with single space between each. All non-string values are converted to
     string.
 
-    :param Mapping | Iterable[(str, object)] optargs: values used as
-        options/arguments
-    :return str: text to add to base command, based on given opts/args
-    :raise TypeError: if an option name isn't a string
+    Args:
+        optargs: values used as options/arguments
+
+    Returns:
+        str: text to add to base command, based on given opts/args
+
+    Raises:
+        TypeError: if an option name isn't a string
     """
 
     def render(k, v):
@@ -196,12 +201,14 @@ def build_cli_extra(optargs):
 
 
 def query_yes_no(question, default="no"):
-    """
-    Ask a yes/no question via raw_input() and return their answer.
+    """Ask a yes/no question via raw_input() and return their answer.
 
-    :param str question: a string that is presented to the user.
-    :param str default: the presumed answer if the user just hits <Enter>.
-    :return bool: True for "yes" or False for "no"
+    Args:
+        question: a string that is presented to the user.
+        default: the presumed answer if the user just hits <Enter>.
+
+    Returns:
+        bool: True for "yes" or False for "no"
     """
 
     def parse(ans):
@@ -225,13 +232,15 @@ def query_yes_no(question, default="no"):
 
 
 def convert_value(val):
-    """
-    Convert string to the most appropriate type, one of:
-    bool, str, int, None or float
+    """Convert string to the most appropriate type.
 
-    :param str val: the string to convert
-    :return bool | str | int | float | None: converted string to the
-        most appropriate type
+    Converts to one of: bool, str, int, None or float
+
+    Args:
+        val: the string to convert
+
+    Returns:
+        bool | str | int | float | None: converted string to the most appropriate type
     """
     if not isinstance(val, str):
         try:
