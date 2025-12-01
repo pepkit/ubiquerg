@@ -4,7 +4,6 @@ import os
 import subprocess
 import pytest
 from ubiquerg import is_command_callable
-from veracitools import ExpectContext
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -37,12 +36,23 @@ def _mkfile(f):
 
 @pytest.mark.parametrize(
     ["cmd", "exp"],
-    [("man", True), ("not-a-cmd", False), (None, TypeError), ("", ValueError)],
+    [("man", True), ("not-a-cmd", False)],
 )
 def test_command_callability_check_basic(cmd, exp):
     """Verify expected behavior of command callability checker."""
-    with ExpectContext(exp, is_command_callable) as check_callable:
-        check_callable(cmd)
+    assert is_command_callable(cmd) == exp
+
+
+def test_command_callability_none_raises_type_error():
+    """None input should raise TypeError."""
+    with pytest.raises(TypeError):
+        is_command_callable(None)
+
+
+def test_command_callability_empty_string_raises_value_error():
+    """Empty string should raise ValueError."""
+    with pytest.raises(ValueError):
+        is_command_callable("")
 
 
 @pytest.mark.parametrize(

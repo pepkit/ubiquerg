@@ -23,8 +23,5 @@ jobs:
     - name: Install package
       run: python -m pip install .
 
-    - name: Install test dependancies
-      run: python -m pip install -r requirements/requirements-test.txt
-
     - name: Run pytest tests
-      run: pytest tests --cov=./ --cov-report=xml
+      run: pytest tests
