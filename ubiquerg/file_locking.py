@@ -6,7 +6,7 @@ import os
 from contextlib import contextmanager
 from .files import wait_for_lock, create_file_racefree
 from signal import signal, SIGINT, SIGTERM
-from typing import Union, List
+from typing import Union
 
 PID = os.getpid()
 READ = f"read-{PID}"
@@ -271,7 +271,7 @@ def locked_read_file(filepath, create_file: bool = False) -> str:
     return file_contents
 
 
-def wait_for_locks(lock_paths: Union[List, str], wait_max: int = 10):
+def wait_for_locks(lock_paths: Union[list, str], wait_max: int = 10):
     """Wait for lock files to be removed.
 
     Args:

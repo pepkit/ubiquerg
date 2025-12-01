@@ -9,6 +9,7 @@ import time
 from warnings import warn
 from tarfile import open as topen
 from hashlib import md5
+from typing import Union
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
 LOCK_PREFIX = "lock."
 
 
-def checksum(path, blocksize=int(2e9)):
+def checksum(path: str, blocksize: int = int(2e9)) -> str:
     """Generate a md5 checksum for the file contents in the provided path.
 
     Args:
@@ -48,7 +49,7 @@ def checksum(path, blocksize=int(2e9)):
     return m.hexdigest()
 
 
-def size(path, size_str=True):
+def size(path: Union[str, list[str]], size_str: bool = True) -> Union[int, str, None]:
     """Get the size of a file or directory or list of them in the provided path.
 
     Args:
@@ -86,7 +87,7 @@ def size(path, size_str=True):
     return filesize_to_str(s) if size_str else s
 
 
-def filesize_to_str(size):
+def filesize_to_str(size: Union[int, float]) -> Union[str, int, float]:
     """Convert the numeric bytes to the size string.
 
     Args:
@@ -106,7 +107,7 @@ def filesize_to_str(size):
     return size
 
 
-def untar(src, dst):
+def untar(src: str, dst: str) -> None:
     """Unpack a path to a target folder.
 
     All the required directories will be created.
@@ -119,7 +120,7 @@ def untar(src, dst):
         tf.extractall(path=dst)
 
 
-def get_file_mod_time(pth):
+def get_file_mod_time(pth: str) -> float:
     """Safely get last modification time for a file.
 
     Prevents situation when file is deleted between file existence check and
@@ -141,7 +142,7 @@ def get_file_mod_time(pth):
         return time.time()
 
 
-def wait_for_lock(lock_file, wait_max=30):
+def wait_for_lock(lock_file: str, wait_max: int = 30) -> None:
     """Just sleep until the lock_file does not exist.
 
     Args:
@@ -185,7 +186,7 @@ def wait_for_lock(lock_file, wait_max=30):
         _LOGGER.info(f" File unlocked: {os.path.basename(lock_file)}")
 
 
-def create_file_racefree(file):
+def create_file_racefree(file: str) -> str:
     """Create a file, but fail if the file already exists.
 
     This function will thus only succeed if this process actually creates
@@ -204,7 +205,7 @@ def create_file_racefree(file):
     return file
 
 
-def make_lock_path(lock_name_base):
+def make_lock_path(lock_name_base: Union[str, list[str]]) -> Union[str, list[str]]:
     """Create a collection of path to locks file with given name as bases.
 
     Args:
@@ -226,7 +227,7 @@ def make_lock_path(lock_name_base):
     )
 
 
-def remove_lock(filepath):
+def remove_lock(filepath: str) -> bool:
     """Remove lock.
 
     Args:
@@ -242,7 +243,7 @@ def remove_lock(filepath):
     return False
 
 
-def _create_lock(lock_path, filepath, wait_max):
+def _create_lock(lock_path: str, filepath: str, wait_max: int) -> None:
     try:
         create_file_racefree(lock_path)
     except FileNotFoundError:
@@ -266,7 +267,7 @@ def _create_lock(lock_path, filepath, wait_max):
             raise e
 
 
-def create_lock(filepath, wait_max=10):
+def create_lock(filepath: str, wait_max: int = 10) -> None:
     """Securely create a lock file.
 
     Args:

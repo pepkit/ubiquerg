@@ -6,6 +6,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 - Removed veracitools as test dependency, and all other test dependencies.
+- Added type hints and restructured docstrings.
+- Removed support for Python <3.9, including legacy Python 2.x code
 
 ## [0.8.1] - 2025-03-05
 

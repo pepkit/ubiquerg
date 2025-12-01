@@ -3,7 +3,7 @@
 import os
 import re
 
-from typing import List, Tuple, Any, Union
+from typing import Any, Union, Optional
 
 from .web import is_url
 
@@ -25,7 +25,7 @@ def expandpath(path):
 
 def parse_registry_path(
     rpstring: str,
-    defaults: List[Tuple[str, Any]] = [
+    defaults: list[tuple[str, Any]] = [
         ("protocol", None),
         ("namespace", None),
         ("item", None),
@@ -84,7 +84,7 @@ def parse_registry_path(
     return parsed_identifier
 
 
-def mkabs(path: str, reldir: str = None) -> str:
+def mkabs(path: str, reldir: Optional[str] = None) -> str:
     """Make sure a path is absolute.
 
     If not already absolute, it's made absolute relative to a given directory (or file).

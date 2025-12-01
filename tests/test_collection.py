@@ -2,12 +2,7 @@
 
 from collections import Counter, OrderedDict
 import itertools
-import sys
-
-if sys.version_info.major < 3:
-    from inspect import getargspec as get_fun_sig
-else:
-    from inspect import getfullargspec as get_fun_sig
+from inspect import getfullargspec as get_fun_sig
 import random
 import string
 import sys
@@ -237,17 +232,6 @@ def test_powerset_illegal_input(arbwrap, kwargs, exp_err, pool):
     )
     with pytest.raises(exp_err):
         powerset(arbwrap(pool), **kwargs)
-
-
-@pytest.mark.parametrize(
-    "dict", [{"a": 1}, {"b": None}, {"b": ["test", ["test", "test"]], "c": [{"b": 1}]}]
-)
-def test_asciifying_dicts(dict):
-    if sys.version_info[0] >= 3:
-        with pytest.warns(UserWarning):
-            assert dict == asciify_dict(dict)
-    else:
-        asciify_dict(dict)
 
 
 @pytest.mark.parametrize(

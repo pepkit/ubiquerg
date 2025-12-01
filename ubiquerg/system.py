@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+from typing import Optional
 
 __author__ = "Databio Lab"
 __email__ = "nathan@code.databio.org"
@@ -9,7 +10,7 @@ __email__ = "nathan@code.databio.org"
 __all__ = ["is_command_callable", "is_writable"]
 
 
-def is_command_callable(cmd):
+def is_command_callable(cmd: str) -> bool:
     """Check if command can be called.
 
     Args:
@@ -48,7 +49,9 @@ def is_command_callable(cmd):
         return not bool(os.system(check))
 
 
-def is_writable(folder, check_exist=False, create=False):
+def is_writable(
+    folder: Optional[str], check_exist: bool = False, create: bool = False
+) -> bool:
     """Make sure a folder is writable.
 
     Given a folder, check that it exists and is writable. Errors if requested on
@@ -66,6 +69,7 @@ def is_writable(folder, check_exist=False, create=False):
         return os.access(folder, os.W_OK) and os.access(folder, os.X_OK)
     elif create:
         os.mkdir(folder)
+        return True
     elif check_exist:
         raise OSError("Folder not found: {}".format(folder))
     else:

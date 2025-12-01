@@ -5,7 +5,7 @@ import re
 __all__ = ["is_url"]
 
 
-def is_url(maybe_url):
+def is_url(maybe_url: str) -> bool:
     """Determine whether a path is a URL.
 
     Args:
