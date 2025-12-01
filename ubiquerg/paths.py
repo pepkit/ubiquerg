@@ -84,6 +84,67 @@ def parse_registry_path(
     return parsed_identifier
 
 
+def parse_registry_path_strict(
+    input_string: str,
+    require_protocol: bool = False,
+    require_namespace: bool = False,
+    require_item: bool = True,
+    require_subitem: bool = False,
+    require_tag: bool = False,
+) -> Union[dict[str, Any], None]:
+    """Parse and validate a registry path with required component checks.
+
+    This function parses a registry path and returns the parsed dictionary
+    only if all required components are present. Returns None otherwise.
+    Can be used as a boolean check (truthy/falsy) or to get the parsed components.
+
+    Args:
+        input_string: String to parse and validate as a registry path
+        require_protocol: If True, protocol component must be present
+        require_namespace: If True, namespace component must be present
+        require_item: If True, item component must be present (default: True)
+        require_subitem: If True, subitem component must be present
+        require_tag: If True, tag component must be present
+
+    Returns:
+        dict | None: Parsed registry path dict if valid and all required components present, else None
+
+    Example:
+        >>> result = parse_registry_path_strict("namespace/item:tag")
+        >>> result['namespace']
+        'namespace'
+        >>> parse_registry_path_strict("item", require_namespace=True)
+        None
+        >>> # Can be used as a boolean check
+        >>> if parse_registry_path_strict("namespace/item", require_namespace=True):
+        ...     print("Valid!")
+        Valid!
+        >>> # Get specific components
+        >>> result = parse_registry_path_strict("protocol::namespace/item.subitem:tag", require_protocol=True)
+        >>> result['protocol']
+        'protocol'
+    """
+    parsed = parse_registry_path(input_string)
+
+    if parsed is None:
+        return None
+
+    # Check required components
+    requirements = {
+        "protocol": require_protocol,
+        "namespace": require_namespace,
+        "item": require_item,
+        "subitem": require_subitem,
+        "tag": require_tag,
+    }
+
+    for component, required in requirements.items():
+        if required and not parsed.get(component):
+            return None
+
+    return parsed
+
+
 def mkabs(path: str, reldir: Optional[str] = None) -> str:
     """Make sure a path is absolute.
 
