@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+from typing import Optional
 
 __author__ = "Databio Lab"
 __email__ = "nathan@code.databio.org"
@@ -9,14 +10,18 @@ __email__ = "nathan@code.databio.org"
 __all__ = ["is_command_callable", "is_writable"]
 
 
-def is_command_callable(cmd):
-    """
-    Check if command can be called.
+def is_command_callable(cmd: str) -> bool:
+    """Check if command can be called.
 
-    :param str cmd: actual command to check for callability
-    :return bool: whether given command's call succeeded
-    :raise TypeError: if the alleged command isn't a string
-    :raise ValueError: if the alleged command is empty
+    Args:
+        cmd: actual command to check for callability
+
+    Returns:
+        bool: whether given command's call succeeded
+
+    Raises:
+        TypeError: if the alleged command isn't a string
+        ValueError: if the alleged command is empty
     """
     if not isinstance(cmd, str):
         raise TypeError(
@@ -44,17 +49,19 @@ def is_command_callable(cmd):
         return not bool(os.system(check))
 
 
-def is_writable(folder, check_exist=False, create=False):
-    """
-    Make sure a folder is writable.
+def is_writable(
+    folder: Optional[str], check_exist: bool = False, create: bool = False
+) -> bool:
+    """Make sure a folder is writable.
 
     Given a folder, check that it exists and is writable. Errors if requested on
     a non-existent folder. Otherwise, make sure the first existing parent folder
     is writable such that this folder could be created.
 
-    :param str folder: Folder to check for writeability.
-    :param bool check_exist: Throw an error if it doesn't exist?
-    :param bool create: Create the folder if it doesn't exist?
+    Args:
+        folder: Folder to check for writeability
+        check_exist: Throw an error if it doesn't exist?
+        create: Create the folder if it doesn't exist?
     """
     folder = folder or "."
 
@@ -62,6 +69,7 @@ def is_writable(folder, check_exist=False, create=False):
         return os.access(folder, os.W_OK) and os.access(folder, os.X_OK)
     elif create:
         os.mkdir(folder)
+        return True
     elif check_exist:
         raise OSError("Folder not found: {}".format(folder))
     else:

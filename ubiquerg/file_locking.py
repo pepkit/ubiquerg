@@ -6,7 +6,7 @@ import os
 from contextlib import contextmanager
 from .files import wait_for_lock, create_file_racefree
 from signal import signal, SIGINT, SIGTERM
-from typing import Union, List
+from typing import Union
 
 PID = os.getpid()
 READ = f"read-{PID}"
@@ -96,11 +96,11 @@ class ThreeLocker(object):
         return True
 
     def create_read_lock(self, filepath: str = None, wait_max: int = None) -> None:
-        """
-        Securely create a read lock file
+        """Securely create a read lock file.
 
-        :param str filepath: path to a file to lock
-        :param int wait_max: max wait time if the file in question is already locked
+        Args:
+            filepath: path to a file to lock
+            wait_max: max wait time if the file in question is already locked
         """
         filepath = filepath or self.filepath
         wait_max = wait_max or self.wait_max
@@ -111,11 +111,11 @@ class ThreeLocker(object):
         _remove_lock(self.lock_paths[UNIVERSAL])
 
     def create_write_lock(self, filepath: str = None, wait_max: int = None) -> None:
-        """
-        Securely create a write lock file
+        """Securely create a write lock file.
 
-        :param str filepath: path to a file to lock
-        :param int wait_max: max wait time if the file in question is already locked
+        Args:
+            filepath: path to a file to lock
+            wait_max: max wait time if the file in question is already locked
         """
         filepath = filepath or self.filepath
         wait_max = wait_max or self.wait_max
@@ -182,8 +182,13 @@ def ensure_locked(type: str = WRITE):  # decorator factory
 
 @contextmanager
 def read_lock(obj: Union[str, object]) -> object:
-    """
-    Read-lock a filepath or object with locker attribute.
+    """Read-lock a filepath or object with locker attribute.
+
+    Args:
+        obj: filepath string or object with locker attribute
+
+    Yields:
+        object: the locked object
     """
     if type(obj) == str:
         locker = ThreeLocker(obj)
@@ -212,8 +217,13 @@ def read_lock(obj: Union[str, object]) -> object:
 
 @contextmanager
 def write_lock(obj: Union[str, object]) -> object:
-    """
-    Write-lock file path or object with locker attribute.
+    """Write-lock file path or object with locker attribute.
+
+    Args:
+        obj: filepath string or object with locker attribute
+
+    Yields:
+        object: the locked object
     """
     if type(obj) == str:
         locker = ThreeLocker(obj)
@@ -237,12 +247,17 @@ def write_lock(obj: Union[str, object]) -> object:
 
 
 def locked_read_file(filepath, create_file: bool = False) -> str:
-    """
-    Read a file contents into memory after locking the file. This will prevent
-    other ThreeLocker-protected processes from writing to the file while it is
-    being read.
+    """Read a file contents into memory after locking the file.
 
-    :param str filepath: path to the file that should be read
+    This will prevent other ThreeLocker-protected processes from writing to the
+    file while it is being read.
+
+    Args:
+        filepath: path to the file that should be read
+        create_file: whether to create the file if it doesn't exist
+
+    Returns:
+        str: file contents
     """
     if os.path.exists(filepath):
         with read_lock(filepath), open(filepath, "r") as file:
@@ -256,12 +271,12 @@ def locked_read_file(filepath, create_file: bool = False) -> str:
     return file_contents
 
 
-def wait_for_locks(lock_paths: Union[List, str], wait_max: int = 10):
-    """
-    Wait for a lock file to be removed
+def wait_for_locks(lock_paths: Union[list, str], wait_max: int = 10):
+    """Wait for lock files to be removed.
 
-    :param str lock_paths: path to a file to lock
-    :param int wait_max: max wait time if the file in question is already locked
+    Args:
+        lock_paths: path to a file to lock
+        wait_max: max wait time if the file in question is already locked
     """
     if not isinstance(lock_paths, list):
         lock_paths = [lock_paths]
@@ -307,12 +322,13 @@ def _create_lock(lock_path, filepath, wait_max) -> None:
 
 
 def _remove_lock(lock_path) -> bool:
-    """
-    Remove lock
+    """Remove lock.
 
-    :param str filepath: path to the file to remove the lock for.
-        Not the path to the lock!
-    :return bool: whether the lock was found and removed
+    Args:
+        lock_path: path to the lock file to remove. Not the path to the actual file!
+
+    Returns:
+        bool: whether the lock was found and removed
     """
     _LOGGER.debug(f"Removing lock at {os.path.basename(lock_path)}")
     if os.path.exists(lock_path):
@@ -335,16 +351,17 @@ def make_all_lock_paths(filepath):
 
 
 def mkabs(path, reldir=None):
-    """
-    Makes sure a path is absolute; if not already absolute, it's made absolute
-    relative to a given directory. Also expands ~ and environment variables for
-    kicks.
+    """Make sure a path is absolute.
 
-    :param str path: Path to make absolute
-    :param str reldir: Relative directory to make path absolute from if it's
-        not already absolute
+    If not already absolute, it's made absolute relative to a given directory.
+    Also expands ~ and environment variables for kicks.
 
-    :return str: Absolute path
+    Args:
+        path: Path to make absolute
+        reldir: Relative directory to make path absolute from if it's not already absolute
+
+    Returns:
+        str: Absolute path
     """
 
     def xpand(path):

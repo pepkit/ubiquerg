@@ -3,11 +3,10 @@
 import itertools
 import sys
 from warnings import warn
+from typing import Any, Optional, TypeVar
+from collections.abc import Iterable, Mapping
 
-if sys.version_info < (3, 3):
-    from collections import Iterable
-else:
-    from collections.abc import Iterable, Mapping
+T = TypeVar("T")
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -22,22 +21,30 @@ __all__ = [
 ]
 
 
-def merge_dicts(x, y):
-    """
-    Merge dictionaries
+def merge_dicts(x: dict[Any, Any], y: dict[Any, Any]) -> dict[Any, Any]:
+    """Merge dictionaries.
 
-    :param Mapping x: dict to merge
-    :param Mapping y: dict to merge
-    :return Mapping: merged dict
+    Args:
+        x: dict to merge
+        y: dict to merge
+
+    Returns:
+        Mapping: merged dict
     """
     z = x.copy()
     z.update(y)
     return z
 
 
-def deep_update(old, new):
-    """
-    Recursively update nested dict, modifying source
+def deep_update(old: dict[Any, Any], new: Mapping[Any, Any]) -> dict[Any, Any]:
+    """Recursively update nested dict, modifying source.
+
+    Args:
+        old: dict to update
+        new: dict with new values
+
+    Returns:
+        dict: updated dict
     """
     for key, value in new.items():
         if isinstance(value, Mapping) and value:
@@ -47,45 +54,53 @@ def deep_update(old, new):
     return old
 
 
-def is_collection_like(c):
-    """
+def is_collection_like(c: Any) -> bool:
+    """Determine whether an object is collection-like.
 
-    Determine whether an object is collection-like.
+    Args:
+        c: Object to test as collection
 
-    :param object c: Object to test as collection
-    :return bool: Whether the argument is a (non-string) collection
+    Returns:
+        bool: Whether the argument is a (non-string) collection
     """
     return isinstance(c, Iterable) and not isinstance(c, str)
 
 
-def uniqify(seq):  # Dave Kirby
-    """
-    Return only unique items in a sequence, preserving order
+def uniqify(seq: list[T]) -> list[T]:  # Dave Kirby
+    """Return only unique items in a sequence, preserving order.
 
-    :param list seq: List of items to uniqify
-    :return list[object]: Original list with duplicates removed
+    Args:
+        seq: List of items to uniqify
+
+    Returns:
+        list[object]: Original list with duplicates removed
     """
     # Order preserving
     seen = set()
-    return [x for x in seq if x not in seen and not seen.add(x)]
+    # Use list comprehension for speed
+    return [x for x in seq if x not in seen and not seen.add(x)]  # type: ignore[func-returns-value]
 
 
-def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
-    """
-    Build the powerset of a collection of items.
+def powerset(
+    items: Iterable[T],
+    min_items: Optional[int] = None,
+    include_full_pop: bool = True,
+    nonempty: bool = False,
+) -> list[tuple[T, ...]]:
+    """Build the powerset of a collection of items.
 
-    :param Iterable[object] items: "Pool" of all items, the population for
-        which to build the power set.
-    :param int min_items: Minimum number of individuals from the population
-        to allow in any given subset.
-    :param bool include_full_pop: Whether to include the full population in
-        the powerset (default True to accord with genuine definition)
-    :param bool nonempty: force each subset returned to be nonempty
-    :return list[object]: Sequence of subsets of the population, in
-        nondecreasing size order
-    :raise TypeError: if minimum item count is specified but is not an integer
-    :raise ValueError: if minimum item count is insufficient to guarantee
-        nonempty subsets
+    Args:
+        items: "Pool" of all items, the population for which to build the power set
+        min_items: Minimum number of individuals from the population to allow in any given subset
+        include_full_pop: Whether to include the full population in the powerset (default True to accord with genuine definition)
+        nonempty: force each subset returned to be nonempty
+
+    Returns:
+        list[object]: Sequence of subsets of the population, in nondecreasing size order
+
+    Raises:
+        TypeError: if minimum item count is specified but is not an integer
+        ValueError: if minimum item count is insufficient to guarantee nonempty subsets
     """
     if min_items is None:
         min_items = 1 if nonempty else 0
@@ -114,34 +129,26 @@ def powerset(items, min_items=None, include_full_pop=True, nonempty=False):
     )
 
 
-def asciify_dict(data):
-    """https://gist.github.com/chris-hailstorm/4989643"""
+def asciify_dict(data: dict[Any, Any]) -> dict[Any, Any]:
+    """Legacy Python 2 function - now just returns input unchanged.
 
-    def _asciify_list(lst):
-        ret = []
-        for item in lst:
-            if isinstance(item, unicode):
-                item = item.encode("utf-8")
-            elif isinstance(item, list):
-                item = _asciify_list(item)
-            elif isinstance(item, dict):
-                item = asciify_dict(item)
-            ret.append(item)
-        return ret
+    This function was used to convert unicode strings to ASCII in Python 2.
+    In Python 3+, strings are unicode by default, so this is a no-op.
 
-    if sys.version_info[0] >= 3:
-        warn("This operation is supported only in Python2", UserWarning)
-        return data
+    Reference: https://gist.github.com/chris-hailstorm/4989643
 
-    ret = {}
-    for key, value in data.iteritems():
-        if isinstance(key, unicode):
-            key = key.encode("utf-8")
-        if isinstance(value, unicode):
-            value = value.encode("utf-8")
-        elif isinstance(value, list):
-            value = _asciify_list(value)
-        elif isinstance(value, dict):
-            value = asciify_dict(value)
-        ret[key] = value
-    return ret
+    Args:
+        data: Dictionary to process
+
+    Returns:
+        dict: The same dictionary (unchanged in Python 3.9+)
+
+    Note:
+        Deprecated: This function is kept for backward compatibility but does nothing in Python 3.9+.
+    """
+    warn(
+        "asciify_dict is deprecated and does nothing in Python 3.9+",
+        DeprecationWarning,
+        stacklevel=2,
+    )
+    return data

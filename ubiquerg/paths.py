@@ -3,7 +3,7 @@
 import os
 import re
 
-from typing import List, Tuple, Any, Union
+from typing import Any, Union, Optional
 
 from .web import is_url
 
@@ -12,18 +12,20 @@ __email__ = "vreuter@virginia.edu"
 
 
 def expandpath(path):
-    """
-    Expand a filesystem path that may or may not contain user/env vars.
+    """Expand a filesystem path that may or may not contain user/env vars.
 
-    :param str path: path to expand
-    :return str: expanded version of input path
+    Args:
+        path: path to expand
+
+    Returns:
+        str: expanded version of input path
     """
     return os.path.expandvars(os.path.expanduser(path))
 
 
 def parse_registry_path(
     rpstring: str,
-    defaults: List[Tuple[str, Any]] = [
+    defaults: list[tuple[str, Any]] = [
         ("protocol", None),
         ("namespace", None),
         ("item", None),
@@ -31,8 +33,7 @@ def parse_registry_path(
         ("tag", None),
     ],
 ) -> Union[dict, None]:
-    """
-    Parse a 'registry path' string into components.
+    """Parse a 'registry path' string into components.
 
     A registry path is a string that is kind of like a URL, providing a unique
     identifier for a particular asset, like
@@ -40,10 +41,12 @@ def parse_registry_path(
     change the names of the entries in the return dict, and to provide defaults
     in case of missing values.
 
-    :param str rpstring: string to parse
-    :param list defaults: A list of 5 tuples with name of the 5 entries, and a
-        default value in case it is missing (can be 'None')
-    :return dict: dict with one element for each parsed entry in the path
+    Args:
+        rpstring: string to parse
+        defaults: A list of 5 tuples with name of the 5 entries, and a default value in case it is missing (can be 'None')
+
+    Returns:
+        dict | None: dict with one element for each parsed entry in the path
     """
 
     # This commented regex is the same without protocol
@@ -81,17 +84,79 @@ def parse_registry_path(
     return parsed_identifier
 
 
-def mkabs(path: str, reldir: str = None) -> str:
+def parse_registry_path_strict(
+    input_string: str,
+    require_protocol: bool = False,
+    require_namespace: bool = False,
+    require_item: bool = True,
+    require_subitem: bool = False,
+    require_tag: bool = False,
+) -> Union[dict[str, Any], None]:
+    """Parse and validate a registry path with required component checks.
+
+    This function parses a registry path and returns the parsed dictionary
+    only if all required components are present. Returns None otherwise.
+    Can be used as a boolean check (truthy/falsy) or to get the parsed components.
+
+    Args:
+        input_string: String to parse and validate as a registry path
+        require_protocol: If True, protocol component must be present
+        require_namespace: If True, namespace component must be present
+        require_item: If True, item component must be present (default: True)
+        require_subitem: If True, subitem component must be present
+        require_tag: If True, tag component must be present
+
+    Returns:
+        dict | None: Parsed registry path dict if valid and all required components present, else None
+
+    Example:
+        >>> result = parse_registry_path_strict("namespace/item:tag")
+        >>> result['namespace']
+        'namespace'
+        >>> parse_registry_path_strict("item", require_namespace=True)
+        None
+        >>> # Can be used as a boolean check
+        >>> if parse_registry_path_strict("namespace/item", require_namespace=True):
+        ...     print("Valid!")
+        Valid!
+        >>> # Get specific components
+        >>> result = parse_registry_path_strict("protocol::namespace/item.subitem:tag", require_protocol=True)
+        >>> result['protocol']
+        'protocol'
     """
-    Makes sure a path is absolute; if not already absolute, it's made absolute
-    relative to a given directory (or file). Also expands ~ and environment variables for
-    kicks.
+    parsed = parse_registry_path(input_string)
 
-    :param str path: Path to make absolute
-    :param str reldir: Relative directory to make path absolute from if it's
-        not already absolute
+    if parsed is None:
+        return None
 
-    :return str: Absolute path
+    # Check required components
+    requirements = {
+        "protocol": require_protocol,
+        "namespace": require_namespace,
+        "item": require_item,
+        "subitem": require_subitem,
+        "tag": require_tag,
+    }
+
+    for component, required in requirements.items():
+        if required and not parsed.get(component):
+            return None
+
+    return parsed
+
+
+def mkabs(path: str, reldir: Optional[str] = None) -> str:
+    """Make sure a path is absolute.
+
+    If not already absolute, it's made absolute relative to a given directory (or file).
+    Also expands ~ and environment variables for kicks.
+
+    Args:
+        path: Path to make absolute
+        reldir: Relative directory to make path absolute from if it's not already absolute
+
+    Returns:
+        str: Absolute path
     """
 
     def xpand(path):
