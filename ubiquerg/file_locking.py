@@ -176,7 +176,7 @@ def ensure_locked(type: str = WRITE):  # decorator factory
 
 
 @contextmanager
-def read_lock(obj: str | object) -> object:
+def read_lock(obj: object) -> object:
     """Read-lock a filepath or object with locker attribute.
 
     Args:
@@ -211,7 +211,7 @@ def read_lock(obj: str | object) -> object:
 
 
 @contextmanager
-def write_lock(obj: str | object) -> object:
+def write_lock(obj: object) -> object:
     """Write-lock file path or object with locker attribute.
 
     Args:

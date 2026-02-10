@@ -54,7 +54,7 @@ class VersionInHelpParser(ArgumentParser):
             list[argparse.<action_type>]: list of argument actions
         """
         excl = [_SubParsersAction, _HelpAction, _VersionAction]
-        return [a for a in self._actions if type(a) not in excl]
+        return [a for a in self._actions if not isinstance(a, tuple(excl))]
 
     def subcommands(self) -> list[str]:
         """Get subcommands defined by a parser.

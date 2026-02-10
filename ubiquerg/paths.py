@@ -144,7 +144,7 @@ def parse_registry_path_strict(
     return parsed
 
 
-def mkabs(path: str, reldir: str | None = None) -> str:
+def mkabs(path: str | None, reldir: str | None = None) -> str | None:
     """Make sure a path is absolute.
 
     If not already absolute, it's made absolute relative to a given directory (or file).
