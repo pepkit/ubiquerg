@@ -14,6 +14,8 @@ from .cli_tools import (
 from .collection import deep_update, is_collection_like, merge_dicts, powerset
 from .environment import TmpEnv
 from .file_locking import (
+    READ,
+    WRITE,
     ThreeLocker,
     ensure_locked,
     ensure_write_access,
@@ -62,6 +64,7 @@ __all__ = [
     "parse_registry_path_strict",
     "powerset",
     "query_yes_no",
+    "READ",
     "read_lock",
     "remove_lock",
     "size",
@@ -71,5 +74,6 @@ __all__ = [
     "VersionInHelpParser",
     "wait_for_lock",
     "wait_for_locks",
+    "WRITE",
     "write_lock",
 ]
