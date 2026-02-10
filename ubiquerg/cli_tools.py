@@ -1,22 +1,24 @@
 """Functions for working with command-line interaction"""
 
-from .collection import is_collection_like, merge_dicts
-from argparse import (
-    ArgumentParser,
-    _SubParsersAction,
-    _HelpAction,
-    _VersionAction,
-    SUPPRESS,
-)
 import sys
-from typing import Any, Optional, Union, Iterable
+from argparse import (
+    SUPPRESS,
+    ArgumentParser,
+    _HelpAction,
+    _SubParsersAction,
+    _VersionAction,
+)
+from collections.abc import Iterable
+from typing import Any
+
+from .collection import is_collection_like, merge_dicts
 
 __classes__ = ["VersionInHelpParser"]
 __all__ = __classes__ + ["build_cli_extra", "query_yes_no", "convert_value"]
 
 
 class VersionInHelpParser(ArgumentParser):
-    def __init__(self, version: Optional[str] = None, **kwargs: Any) -> None:
+    def __init__(self, version: str | None = None, **kwargs: Any) -> None:
         """Overwrites the inherited init. Saves the version as an object attribute for further use."""
         super(VersionInHelpParser, self).__init__(**kwargs)
         self.version = version
@@ -29,11 +31,7 @@ class VersionInHelpParser(ArgumentParser):
 
     def format_help(self) -> str:
         """Add version information to help text."""
-        help_string = (
-            "version: {}\n".format(str(self.version))
-            if self.version is not None
-            else ""
-        )
+        help_string = "version: {}\n".format(str(self.version)) if self.version is not None else ""
         return help_string + super(VersionInHelpParser, self).format_help()
 
     def subparsers(self) -> _SubParsersAction:
@@ -56,7 +54,7 @@ class VersionInHelpParser(ArgumentParser):
             list[argparse.<action_type>]: list of argument actions
         """
         excl = [_SubParsersAction, _HelpAction, _VersionAction]
-        return [a for a in self._actions if not type(a) in excl]
+        return [a for a in self._actions if type(a) not in excl]
 
     def subcommands(self) -> list[str]:
         """Get subcommands defined by a parser.
@@ -67,8 +65,8 @@ class VersionInHelpParser(ArgumentParser):
         return list(self.subparsers().choices.keys())
 
     def dests_by_subparser(
-        self, subcommand: Optional[str] = None, top_level: bool = False
-    ) -> Union[list[str], dict[str, list[str]]]:
+        self, subcommand: str | None = None, top_level: bool = False
+    ) -> list[str] | dict[str, list[str]]:
         """Get argument dests by subcommand from a parser.
 
         Args:
@@ -124,10 +122,10 @@ class VersionInHelpParser(ArgumentParser):
 
     def arg_defaults(
         self,
-        subcommand: Optional[str] = None,
+        subcommand: str | None = None,
         unique: bool = False,
         top_level: bool = False,
-    ) -> Union[dict[str, Any], dict[str, dict[str, Any]]]:
+    ) -> dict[str, Any] | dict[str, dict[str, Any]]:
         """Get argument defaults by subcommand from a parser.
 
         Args:
@@ -173,7 +171,7 @@ class VersionInHelpParser(ArgumentParser):
         return defaults
 
 
-def build_cli_extra(optargs: Union[dict[str, Any], Iterable]) -> str:
+def build_cli_extra(optargs: dict[str, Any] | Iterable) -> str:
     """Render CLI options/args as text to add to base command.
 
     To specify a flag, map an option to None. Otherwise, map option short or
@@ -220,9 +218,7 @@ def query_yes_no(question: str, default: str = "no") -> bool:
     """
 
     def parse(ans):
-        return {"yes": True, "y": True, "ye": True, "no": False, "n": False}[
-            ans.lower()
-        ]
+        return {"yes": True, "y": True, "ye": True, "no": False, "n": False}[ans.lower()]
 
     try:
         prompt = {None: "[y/n]", "yes": "[Y/n]", "no": "[y/N]"}[
@@ -239,7 +235,7 @@ def query_yes_no(question: str, default: str = "no") -> bool:
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
-def convert_value(val: Any) -> Union[bool, str, int, float, None]:
+def convert_value(val: Any) -> bool | str | int | float | None:
     """Convert string to the most appropriate type.
 
     Converts to one of: bool, str, int, None or float
@@ -253,10 +249,9 @@ def convert_value(val: Any) -> Union[bool, str, int, float, None]:
     if not isinstance(val, str):
         try:
             val = str(val)
-        except:
+        except Exception:
             raise ValueError(
-                "The input has to be of type convertible to 'str',"
-                " got '{}'".format(type(val))
+                "The input has to be of type convertible to 'str', got '{}'".format(type(val))
             )
 
     # val is definitely a string at this point

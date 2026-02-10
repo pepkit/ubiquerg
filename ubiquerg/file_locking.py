@@ -2,11 +2,10 @@ import errno
 import glob
 import logging
 import os
-
 from contextlib import contextmanager
-from .files import wait_for_lock, create_file_racefree
-from signal import signal, SIGINT, SIGTERM
-from typing import Union
+from signal import SIGINT, SIGTERM, signal
+
+from .files import create_file_racefree, wait_for_lock
 
 PID = os.getpid()
 READ = f"read-{PID}"
@@ -29,9 +28,7 @@ class ThreeLocker(object):
     It creates lock files in the same directory as the file to be locked.
     """
 
-    def __init__(
-        self, filepath: str, wait_max: int = 10, strict_ro_locks: bool = False
-    ):
+    def __init__(self, filepath: str, wait_max: int = 10, strict_ro_locks: bool = False):
         self.wait_max = wait_max
         self.strict_ro_locks = strict_ro_locks
         self.set_file_path(filepath)
@@ -132,12 +129,12 @@ class ThreeLocker(object):
 
     def _interrupt_handler(self, signal_received, frame):
         if signal_received == SIGINT:
-            _LOGGER.warning(f"Received SIGINT, unlocking file and exiting...")
+            _LOGGER.warning("Received SIGINT, unlocking file and exiting...")
             self.write_unlock()
             self.read_unlock()
             raise SystemExit
         if signal_received == SIGTERM:
-            _LOGGER.warning(f"Received SIGTERM, unlocking file and exiting...")
+            _LOGGER.warning("Received SIGTERM, unlocking file and exiting...")
             self.__exit__(None, None, None)
             self.write_unlock()
             self.read_unlock()
@@ -169,9 +166,7 @@ def ensure_locked(type: str = WRITE):  # decorator factory
             if not self.locker:
                 raise OSError("File not lockable. File locker not provided.")
             if not self.locker.locked[type]:
-                raise OSError(
-                    f"This function must use a context manager to {type}-lock the file"
-                )
+                raise OSError(f"This function must use a context manager to {type}-lock the file")
 
             return func(self, *args, **kwargs)
 
@@ -181,7 +176,7 @@ def ensure_locked(type: str = WRITE):  # decorator factory
 
 
 @contextmanager
-def read_lock(obj: Union[str, object]) -> object:
+def read_lock(obj: str | object) -> object:
     """Read-lock a filepath or object with locker attribute.
 
     Args:
@@ -190,7 +185,7 @@ def read_lock(obj: Union[str, object]) -> object:
     Yields:
         object: the locked object
     """
-    if type(obj) == str:
+    if isinstance(obj, str):
         locker = ThreeLocker(obj)
     elif hasattr(obj, "locker"):
         locker = obj.locker
@@ -216,7 +211,7 @@ def read_lock(obj: Union[str, object]) -> object:
 
 
 @contextmanager
-def write_lock(obj: Union[str, object]) -> object:
+def write_lock(obj: str | object) -> object:
     """Write-lock file path or object with locker attribute.
 
     Args:
@@ -225,7 +220,7 @@ def write_lock(obj: Union[str, object]) -> object:
     Yields:
         object: the locked object
     """
-    if type(obj) == str:
+    if isinstance(obj, str):
         locker = ThreeLocker(obj)
     elif hasattr(obj, "locker"):
         locker = obj.locker
@@ -271,7 +266,7 @@ def locked_read_file(filepath, create_file: bool = False) -> str:
     return file_contents
 
 
-def wait_for_locks(lock_paths: Union[list, str], wait_max: int = 10):
+def wait_for_locks(lock_paths: list | str, wait_max: int = 10):
     """Wait for lock files to be removed.
 
     Args:

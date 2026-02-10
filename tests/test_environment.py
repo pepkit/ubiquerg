@@ -1,7 +1,9 @@
 """Tests for environment-related functionality"""
 
 import os
+
 import pytest
+
 from ubiquerg import TmpEnv
 
 

@@ -1,7 +1,8 @@
 """Validate what's available directly on the top-level import."""
 
-import pytest
 from inspect import isclass, isfunction
+
+import pytest
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"

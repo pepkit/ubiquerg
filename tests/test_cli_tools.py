@@ -1,9 +1,11 @@
 """Tests for rendering CLI options and arguments"""
 
-from collections import OrderedDict
-import pytest
-from ubiquerg import build_cli_extra, powerset, VersionInHelpParser, convert_value
 import argparse
+from collections import OrderedDict
+
+import pytest
+
+from ubiquerg import VersionInHelpParser, build_cli_extra, convert_value, powerset
 
 
 def pytest_generate_tests(metafunc):
@@ -13,17 +15,16 @@ def pytest_generate_tests(metafunc):
 
 
 def build_parser():
-    """
-    Example argument parser, needed solely for testing purposes.
+    """Example argument parser, needed solely for testing purposes.
+
     This example parser was copied from looper/__init__.py
 
-    :return argparse.ArgumentParser
+    Returns:
+        Tuple of argument parser and message dict
     """
 
     banner = "%(prog)s - Loop through samples and submit pipelines."
-    additional_description = (
-        "For subcommand-specific options, " "type: '%(prog)s <subcommand> -h'"
-    )
+    additional_description = "For subcommand-specific options, type: '%(prog)s <subcommand> -h'"
     additional_description += "\nhttps://github.com/pepkit/looper"
 
     parser = VersionInHelpParser(
@@ -54,8 +55,7 @@ def build_parser():
         "--env",
         dest="env",
         default=None,
-        help="Environment variable that points to the DIVCFG file. "
-        "(default: DIVCFG)",
+        help="Environment variable that points to the DIVCFG file. (default: DIVCFG)",
     )
     parser.add_argument(
         "--dotfile-template",
@@ -71,8 +71,7 @@ def build_parser():
         "summarize": "Summarize statistics of project samples.",
         "destroy": "Remove all files of the project.",
         "check": "Checks flag status of current runs.",
-        "clean": "Runs clean scripts to remove intermediate "
-        "files of already processed jobs.",
+        "clean": "Runs clean scripts to remove intermediate files of already processed jobs.",
     }
 
     subparsers = parser.add_subparsers(dest="command")
@@ -105,9 +104,7 @@ def build_parser():
             default=0,
             help="Time delay in seconds between job submissions.",
         )
-        subparser.add_argument(
-            "-p", "--package", help="Name of computing resource package to use"
-        )
+        subparser.add_argument("-p", "--package", help="Name of computing resource package to use")
         subparser.add_argument(
             "--compute",
             help="Specification of individual computing resource settings; "
@@ -129,8 +126,7 @@ def build_parser():
             "--settings",
             dest="settings",
             default="",
-            help="path to a YAML-formatted settings file used to populate "
-            "the command template",
+            help="path to a YAML-formatted settings file used to populate the command template",
         )
     for subparser in [run_subparser, rerun_subparser]:
         # Note that defaults for otherwise numeric lump parameters are
@@ -148,7 +144,7 @@ def build_parser():
             "--lumpn",
             default=None,
             type=int,
-            help="Number of individual scripts grouped into " "single submission",
+            help="Number of individual scripts grouped into single submission",
         )
 
     # Other commands
@@ -186,9 +182,7 @@ def build_parser():
         clean_subparser,
         collate_subparser,
     ]:
-        subparser.add_argument(
-            "config_file", nargs="?", help="Project configuration file (YAML)."
-        )
+        subparser.add_argument("config_file", nargs="?", help="Project configuration file (YAML).")
         # subparser.add_argument(
         #         "-c", "--config", required=False, default=None,
         #         dest="looper_config", help="Looper configuration file (
@@ -244,8 +238,7 @@ def build_parser():
             "--amendments",
             dest="amendments",
             nargs="+",
-            help="Name of amendment(s) to use, as designated in the "
-            "project's configuration file",
+            help="Name of amendment(s) to use, as designated in the project's configuration file",
         )
 
     return parser, msg_by_cmd

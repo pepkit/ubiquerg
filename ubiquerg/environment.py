@@ -1,7 +1,6 @@
 """Environment-related utilities"""
 
 import os
-from typing import Any, Optional
 from types import TracebackType
 
 __author__ = "Vince Reuter"
@@ -30,9 +29,9 @@ class TmpEnv(object):
 
     def __exit__(
         self,
-        exc_type: Optional[type],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         for k in self._kvs:
             try:

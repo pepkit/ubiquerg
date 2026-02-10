@@ -1,20 +1,21 @@
 """Tests for checksum"""
 
 import hashlib
-import os
 import itertools
+import os
+from tempfile import mkdtemp
+
 import pytest
 
-from tempfile import mkdtemp
 from ubiquerg import (
     checksum,
-    size,
+    create_file_racefree,
+    create_lock,
     filesize_to_str,
     make_lock_path,
-    create_file_racefree,
-    wait_for_lock,
-    create_lock,
     remove_lock,
+    size,
+    wait_for_lock,
 )
 
 
@@ -121,12 +122,8 @@ class TestLocking:
     def test_lock_file_creation_and_removal(self, fn):
         td = mkdtemp()
         create_lock(os.path.join(td, fn))
-        locks_list = [
-            os.path.join(td, f) for f in os.listdir(td) if f.startswith("lock.")
-        ]
+        locks_list = [os.path.join(td, f) for f in os.listdir(td) if f.startswith("lock.")]
         assert len(locks_list) == 1
         remove_lock(os.path.join(td, fn))
-        locks_list = [
-            os.path.join(td, f) for f in os.listdir(td) if f.startswith("lock.")
-        ]
+        locks_list = [os.path.join(td, f) for f in os.listdir(td) if f.startswith("lock.")]
         assert len(locks_list) == 0

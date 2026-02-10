@@ -1,15 +1,13 @@
 """Functions facilitating file operations"""
 
+import errno
+import logging
 import os
 import sys
-import logging
-import errno
 import time
-
-from warnings import warn
-from tarfile import open as topen
 from hashlib import md5
-from typing import Union
+from tarfile import open as topen
+from warnings import warn
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +47,7 @@ def checksum(path: str, blocksize: int = int(2e9)) -> str:
     return m.hexdigest()
 
 
-def size(path: Union[str, list[str]], size_str: bool = True) -> Union[int, str, None]:
+def size(path: str | list[str], size_str: bool = True) -> int | str | None:
     """Get the size of a file or directory or list of them in the provided path.
 
     Args:
@@ -78,16 +76,14 @@ def size(path: Union[str, list[str]], size_str: bool = True) -> Union[int, str, 
                     s += os.lstat(fp).st_size
                     symlinks.append(fp)
         if len(symlinks) > 0:
-            _LOGGER.info(
-                "{} symlinks were found: {}".format(len(symlinks), "\n".join(symlinks))
-            )
+            _LOGGER.info("{} symlinks were found: {}".format(len(symlinks), "\n".join(symlinks)))
     else:
         warn("size could not be determined for: {}".format(path))
         s = None
     return filesize_to_str(s) if size_str else s
 
 
-def filesize_to_str(size: Union[int, float]) -> Union[str, int, float]:
+def filesize_to_str(size: int | float) -> str | int | float:
     """Convert the numeric bytes to the size string.
 
     Args:
@@ -101,9 +97,7 @@ def filesize_to_str(size: Union[int, float]) -> Union[str, int, float]:
             if size < 1024:
                 return "{}{}".format(round(size, 1), unit)
             size /= 1024
-    warn(
-        "size argument was neither an int nor a float, " "returning the original object"
-    )
+    warn("size argument was neither an int nor a float, returning the original object")
     return size
 
 
@@ -205,7 +199,7 @@ def create_file_racefree(file: str) -> str:
     return file
 
 
-def make_lock_path(lock_name_base: Union[str, list[str]]) -> Union[str, list[str]]:
+def make_lock_path(lock_name_base: str | list[str]) -> str | list[str]:
     """Create a collection of path to locks file with given name as bases.
 
     Args:

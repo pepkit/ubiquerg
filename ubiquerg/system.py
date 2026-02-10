@@ -2,7 +2,6 @@
 
 import os
 import subprocess
-from typing import Optional
 
 __author__ = "Databio Lab"
 __email__ = "nathan@code.databio.org"
@@ -24,9 +23,7 @@ def is_command_callable(cmd: str) -> bool:
         ValueError: if the alleged command is empty
     """
     if not isinstance(cmd, str):
-        raise TypeError(
-            "Alleged command isn't a string: {} ({})".format(cmd, type(cmd))
-        )
+        raise TypeError("Alleged command isn't a string: {} ({})".format(cmd, type(cmd)))
     if not cmd:
         raise ValueError("Empty command to check for callability")
     if os.path.isdir(cmd) or (os.path.isfile(cmd) and not os.access(cmd, os.X_OK)):
@@ -49,9 +46,7 @@ def is_command_callable(cmd: str) -> bool:
         return not bool(os.system(check))
 
 
-def is_writable(
-    folder: Optional[str], check_exist: bool = False, create: bool = False
-) -> bool:
+def is_writable(folder: str | None, check_exist: bool = False, create: bool = False) -> bool:
     """Make sure a folder is writable.
 
     Given a folder, check that it exists and is writable. Errors if requested on

@@ -1,12 +1,14 @@
 """Tests for collection utilities"""
 
-from collections import Counter, OrderedDict
 import itertools
-from inspect import getfullargspec as get_fun_sig
 import random
 import string
 import sys
+from collections import Counter, OrderedDict
+from inspect import getfullargspec as get_fun_sig
+
 import pytest
+
 from ubiquerg.collection import *
 
 __author__ = "Vince Reuter"
@@ -17,54 +19,58 @@ MIN_SIZE_KWARG = "min_size"
 
 
 def combo_space(ks, items):
-    """
-    Create the Cartesian product of values sets, each bound to a key.
+    """Create the Cartesian product of values sets, each bound to a key.
 
-    :param Iterable[str] ks: subset of keys from the mapping items
-    :param Mapping[str, Iterable[object]] items: bindings between key and
-        collection of values
-    :return itertools.product: Cartesian product of the values sets bound by
-        the given subset of keys
+    Args:
+        ks: subset of keys from the mapping items
+        items: bindings between key and collection of values
+
+    Returns:
+        Cartesian product of the values sets bound by the given subset of keys
     """
     return itertools.product(*[items[k] for k in ks])
 
 
 def get_default_parameters(func, pred=None):
-    """
-    For given function, get mapping from parameter name to default value.
+    """For given function, get mapping from parameter name to default value.
 
-    :param callable func: the function to inspect
-    :param func(object, object) -> bool pred: how to determine whether the
-        parameter should be included, based on name and default value
-    :return OrderedDict[str, object]]: mapping from parameter name to default value
+    Args:
+        func: the function to inspect
+        pred: how to determine whether the parameter should be included,
+            based on name and default value
+
+    Returns:
+        Mapping from parameter name to default value
     """
     if not callable(func):
         raise TypeError("Not a callable: {} ({})".format(func.__name__, type(func)))
     spec = get_fun_sig(func)
-    par_arg_pairs = zip(
-        spec.args[(len(spec.args) - len(spec.defaults)) :], spec.defaults
-    )
+    par_arg_pairs = zip(spec.args[(len(spec.args) - len(spec.defaults)) :], spec.defaults)
     return OrderedDict(
-        par_arg_pairs
-        if pred is None
-        else [(p, a) for p, a in par_arg_pairs if pred(p, a)]
+        par_arg_pairs if pred is None else [(p, a) for p, a in par_arg_pairs if pred(p, a)]
     )
 
 
 def _generate_too_few_items(minsize, maxsize, pool):
-    """
-    Generate a "pool" of items of random size guaranteed less than given bound.
+    """Generate a "pool" of items of random size guaranteed less than given bound.
 
-    :param int minsize: minimum pool size
-    :param int maxsize: maximum pool size
-    :param Iterable[object] pool: items from which to pull a subset for the
-        returned pool
-    :return Iterable[object]: subset of initial pool, constrained to be
-        sufficiently small in accordance with given bounds
-    :raise TypeError: if either size bound is not an integer
-    :raise ValueError: if maxsize < minsize
+    Args:
+        minsize: minimum pool size
+        maxsize: maximum pool size
+        pool: items from which to pull a subset for the returned pool
+
+    Returns:
+        Subset of initial pool, constrained to be sufficiently small in
+        accordance with given bounds
+
+    Raises:
+        TypeError: if either size bound is not an integer
+        ValueError: if maxsize < minsize
     """
-    print_bound = lambda: "[{}, {}]".format(minsize, maxsize)
+
+    def print_bound():
+        return "[{}, {}]".format(minsize, maxsize)
+
     if not (isinstance(minsize, int) and isinstance(maxsize, int)):
         raise TypeError("Size bounds must be integers; got {}".format(print_bound()))
     if maxsize < minsize:
@@ -74,15 +80,12 @@ def _generate_too_few_items(minsize, maxsize, pool):
 
 
 POWERSET_BOOL_KWARGSPACE = {
-    p: [False, True]
-    for p in get_default_parameters(powerset, lambda _, v: isinstance(v, bool))
+    p: [False, True] for p in get_default_parameters(powerset, lambda _, v: isinstance(v, bool))
 }
 KWARGSPACE_POWERSET = {
     ks: combo_space(ks, POWERSET_BOOL_KWARGSPACE)
     for n in range(len(POWERSET_BOOL_KWARGSPACE) + 1)
-    for ks in [
-        tuple(c) for c in itertools.combinations(POWERSET_BOOL_KWARGSPACE.keys(), n)
-    ]
+    for ks in [tuple(c) for c in itertools.combinations(POWERSET_BOOL_KWARGSPACE.keys(), n)]
 }
 
 
@@ -93,12 +96,14 @@ def pytest_generate_tests(metafunc):
 
 
 def randcoll(pool, dt):
-    """
-    Generate random collection of 1-10 elements.
+    """Generate random collection of 1-10 elements.
 
-    :param Iterable pool: elements from which to choose
-    :param type dt: type of collection to create
-    :return Iterable[object]: collection of randomly generated elements
+    Args:
+        pool: elements from which to choose
+        dt: type of collection to create
+
+    Returns:
+        Collection of randomly generated elements
     """
     valid_types = [tuple, list, set, dict]
     if dt not in valid_types:
@@ -108,7 +113,7 @@ def randcoll(pool, dt):
             )
         )
     rs = [random.choice(pool) for _ in range(random.randint(1, 10))]
-    return dict(enumerate(rs)) if dt == dict else rs
+    return dict(enumerate(rs)) if dt is dict else rs
 
 
 @pytest.mark.parametrize(
@@ -151,18 +156,14 @@ def test_powerset_of_empty_pool(arbwrap, kwargs):
 @pytest.mark.parametrize(
     ["min_items", "pool"],
     [
-        _generate_too_few_items(
-            2, 10, list(string.ascii_letters) + list(range(-10, 11))
-        )
+        _generate_too_few_items(2, 10, list(string.ascii_letters) + list(range(-10, 11)))
         for _ in range(5)
     ],
 )
 def test_powerset_fewer_items_than_min(arbwrap, min_items, pool, include_full_pop):
     """Minimum item count in excess of pool size results in empty powerset."""
     print("pool (n={}): {}".format(len(pool), pool))
-    assert [] == powerset(
-        arbwrap(pool), min_items=min_items, include_full_pop=include_full_pop
-    )
+    assert [] == powerset(arbwrap(pool), min_items=min_items, include_full_pop=include_full_pop)
 
 
 @pytest.mark.parametrize("pool", [[1, 2, 3], ["a", "b", "c"]])
@@ -225,17 +226,15 @@ def test_powerset_legitimate_input(arbwrap, pool, kwargs, expected):
 def test_powerset_illegal_input(arbwrap, kwargs, exp_err, pool):
     """Invalid argument combination to powerset parameters is exceptional."""
     invalid_kwargs = set(kwargs.keys()) - set(get_fun_sig(powerset).args)
-    assert (
-        not invalid_kwargs
-    ), "Attempting to use keyword arguments not in the signature of {}: {}".format(
-        powerset.__name__, ", ".join(invalid_kwargs)
+    assert not invalid_kwargs, (
+        "Attempting to use keyword arguments not in the signature of {}: {}".format(
+            powerset.__name__, ", ".join(invalid_kwargs)
+        )
     )
     with pytest.raises(exp_err):
         powerset(arbwrap(pool), **kwargs)
 
 
-@pytest.mark.parametrize(
-    ["x", "y"], [({"a": 1}, {"b": 2}), ({"a": 1, "c": 2}, {"b": 2})]
-)
+@pytest.mark.parametrize(["x", "y"], [({"a": 1}, {"b": 2}), ({"a": 1, "c": 2}, {"b": 2})])
 def test_merging_dicts(x, y):
     assert "a" in list(merge_dicts(x, y).keys())

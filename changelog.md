@@ -2,6 +2,22 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
 
+## [0.9.0] -- 2026-02-10
+
+### Changed
+- Migrated packaging from setup.py/setup.cfg to pyproject.toml with hatchling backend
+- Replaced black with ruff for linting and formatting
+- Added .pre-commit-config.yaml with ruff
+- Updated GitHub Actions workflows to latest versions (checkout@v4, setup-python@v5)
+- Updated publish workflow to use `python -m build` instead of `setup.py sdist`
+- Modernized type hints: replaced `Optional`/`Union` with PEP 604 `X | None` / `X | Y` syntax
+- Converted remaining Sphinx-style docstrings to Google style
+- Dropped Python 3.9 support (minimum is now 3.10)
+
+### Removed
+- Deprecated `asciify_dict()` function (was a Python 2 no-op)
+- Legacy packaging files: setup.py, setup.cfg, MANIFEST.in, requirements/
+
 ## [0.8.2] -- 2025-12-01
 
 ### Changed

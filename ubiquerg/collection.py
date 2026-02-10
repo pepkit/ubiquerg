@@ -1,10 +1,8 @@
 """Tools for working with collections"""
 
 import itertools
-import sys
-from warnings import warn
-from typing import Any, Optional, TypeVar
 from collections.abc import Iterable, Mapping
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -15,7 +13,6 @@ __email__ = "vreuter@virginia.edu"
 __all__ = [
     "is_collection_like",
     "powerset",
-    "asciify_dict",
     "merge_dicts",
     "deep_update",
 ]
@@ -83,7 +80,7 @@ def uniqify(seq: list[T]) -> list[T]:  # Dave Kirby
 
 def powerset(
     items: Iterable[T],
-    min_items: Optional[int] = None,
+    min_items: int | None = None,
     include_full_pop: bool = True,
     nonempty: bool = False,
 ) -> list[tuple[T, ...]]:
@@ -107,13 +104,15 @@ def powerset(
     else:
         if not isinstance(min_items, int):
             raise TypeError(
-                "Min items count for each subset isn't an integer: "
-                "{} ({})".format(min_items, type(min_items))
+                "Min items count for each subset isn't an integer: {} ({})".format(
+                    min_items, type(min_items)
+                )
             )
         if nonempty and min_items < 1:
             raise ValueError(
-                "When minimum item count is {}, nonempty subsets "
-                "cannot be guaranteed.".format(min_items)
+                "When minimum item count is {}, nonempty subsets cannot be guaranteed.".format(
+                    min_items
+                )
             )
     # Account for iterable burn possibility; besides, collection should be
     # relatively small if building the powerset.
@@ -127,28 +126,3 @@ def powerset(
             itertools.combinations(items, k) for k in range(min_items, max_items)
         )
     )
-
-
-def asciify_dict(data: dict[Any, Any]) -> dict[Any, Any]:
-    """Legacy Python 2 function - now just returns input unchanged.
-
-    This function was used to convert unicode strings to ASCII in Python 2.
-    In Python 3+, strings are unicode by default, so this is a no-op.
-
-    Reference: https://gist.github.com/chris-hailstorm/4989643
-
-    Args:
-        data: Dictionary to process
-
-    Returns:
-        dict: The same dictionary (unchanged in Python 3.9+)
-
-    Note:
-        Deprecated: This function is kept for backward compatibility but does nothing in Python 3.9+.
-    """
-    warn(
-        "asciify_dict is deprecated and does nothing in Python 3.9+",
-        DeprecationWarning,
-        stacklevel=2,
-    )
-    return data

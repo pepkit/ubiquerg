@@ -2,7 +2,9 @@
 
 import os
 import subprocess
+
 import pytest
+
 from ubiquerg import is_command_callable
 
 __author__ = "Vince Reuter"
