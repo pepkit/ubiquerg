@@ -20,6 +20,7 @@ import ubiquerg
         ("is_collection_like", isfunction),
         ("merge_dicts", isfunction),
         ("powerset", isfunction),
+        ("uniqify", isfunction),
         # environment
         ("TmpEnv", isclass),
         # file_locking

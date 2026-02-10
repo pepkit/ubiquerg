@@ -7,12 +7,19 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Changed
 - Migrated packaging from setup.py/setup.cfg to pyproject.toml with hatchling backend
 - Replaced black with ruff for linting and formatting
-- Added .pre-commit-config.yaml with ruff
-- Updated GitHub Actions workflows to latest versions (checkout@v4, setup-python@v5)
+- Updated GitHub Actions workflows to latest versions (checkout@v6, setup-python@v6)
 - Updated publish workflow to use `python -m build` instead of `setup.py sdist`
 - Modernized type hints: replaced `Optional`/`Union` with PEP 604 `X | None` / `X | Y` syntax
 - Converted remaining Sphinx-style docstrings to Google style
 - Dropped Python 3.9 support (minimum is now 3.10)
+- Added Python 3.14 support
+
+### Fixed
+- Deduplicated `mkabs` in `file_locking.py` — `ThreeLocker` now uses the canonical version from `paths.py` which handles None, URLs, and file-as-reldir
+- Deduplicated `_create_lock` in `file_locking.py` — consolidated to single implementation in `files.py`
+- Fixed `tarfile.extractall()` deprecation warning for Python 3.12+ (added `filter="data"`)
+- Fixed typo "assiated" → "associated" in `cli_tools.py`
+- Re-exported `uniqify` function that was accidentally dropped during explicit-exports migration
 
 ### Removed
 - Deprecated `asciify_dict()` function (was a Python 2 no-op)

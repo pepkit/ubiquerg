@@ -11,7 +11,7 @@ from .cli_tools import (
     convert_value,
     query_yes_no,
 )
-from .collection import deep_update, is_collection_like, merge_dicts, powerset
+from .collection import deep_update, is_collection_like, merge_dicts, powerset, uniqify
 from .environment import TmpEnv
 from .file_locking import (
     READ,
@@ -70,6 +70,7 @@ __all__ = [
     "size",
     "ThreeLocker",
     "TmpEnv",
+    "uniqify",
     "untar",
     "VersionInHelpParser",
     "wait_for_lock",

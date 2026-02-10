@@ -46,7 +46,7 @@ class VersionInHelpParser(ArgumentParser):
         return subs[0]
 
     def top_level_args(self) -> list[Any]:
-        """Get actions not assiated with any subparser.
+        """Get actions not associated with any subparser.
 
         Help and version are also excluded.
 

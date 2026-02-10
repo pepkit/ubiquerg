@@ -1,11 +1,11 @@
-import errno
 import glob
 import logging
 import os
 from contextlib import contextmanager
 from signal import SIGINT, SIGTERM, signal
 
-from .files import create_file_racefree, wait_for_lock
+from .files import _create_lock, create_file_racefree, wait_for_lock
+from .paths import mkabs
 
 PID = os.getpid()
 READ = f"read-{PID}"
@@ -290,32 +290,6 @@ def ensure_write_access(lock_path, strict_ro_locks=False):
             return True
 
 
-def _create_lock(lock_path, filepath, wait_max) -> None:
-    # _LOGGER.debug(f"Creating lock for {filepath} at {lock_path}")
-    _LOGGER.debug(f"Creating lock at {os.path.basename(lock_path)}")
-    try:
-        create_file_racefree(lock_path)
-    except FileNotFoundError:
-        parent_dir = os.path.dirname(filepath)
-        os.makedirs(parent_dir)
-        _create_lock(lock_path, filepath, wait_max)
-    except Exception as e:
-        if e.errno == errno.EEXIST:
-            # Rare case: file already exists;
-            # the lock has been created in the split second since the
-            # last lock existence check,
-            # wait for the lock file to be gone, but no longer than
-            # `wait_max`.
-            _LOGGER.info(
-                "The lock has been created in the split second since the "
-                "last lock existence check. Waiting"
-            )
-            wait_for_lock(lock_path, wait_max)
-            _create_lock(lock_path, filepath, wait_max)
-        else:
-            raise e
-
-
 def _remove_lock(lock_path) -> bool:
     """Remove lock.
 
@@ -343,32 +317,6 @@ def make_all_lock_paths(filepath):
         lock_name = name if name.startswith(prefix) else prefix + name
         lock_paths[type] = lock_name if not base else os.path.join(base, lock_name)
     return lock_paths
-
-
-def mkabs(path, reldir=None):
-    """Make sure a path is absolute.
-
-    If not already absolute, it's made absolute relative to a given directory.
-    Also expands ~ and environment variables for kicks.
-
-    Args:
-        path: Path to make absolute
-        reldir: Relative directory to make path absolute from if it's not already absolute
-
-    Returns:
-        str: Absolute path
-    """
-
-    def xpand(path):
-        return os.path.expandvars(os.path.expanduser(path))
-
-    if os.path.isabs(xpand(path)):
-        return xpand(path)
-
-    if not reldir:
-        return os.path.abspath(xpand(path))
-
-    return os.path.join(xpand(reldir), xpand(path))
 
 
 # class OneLocker(object):

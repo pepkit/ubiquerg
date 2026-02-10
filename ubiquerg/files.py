@@ -111,7 +111,10 @@ def untar(src: str, dst: str) -> None:
         dst: path to output folder
     """
     with topen(src) as tf:
-        tf.extractall(path=dst)
+        if sys.version_info >= (3, 12):
+            tf.extractall(path=dst, filter="data")
+        else:
+            tf.extractall(path=dst)
 
 
 def get_file_mod_time(pth: str) -> float:
