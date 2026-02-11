@@ -170,7 +170,9 @@ def ensure_locked(lock_type: str = WRITE):  # decorator factory
             if not self.locker:
                 raise OSError("File not lockable. File locker not provided.")
             if not self.locker.locked[lock_type]:
-                raise OSError(f"This function must use a context manager to {lock_type}-lock the file")
+                raise OSError(
+                    f"This function must use a context manager to {lock_type}-lock the file"
+                )
 
             return func(self, *args, **kwargs)
 
