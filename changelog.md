@@ -2,6 +2,39 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
 
+## [0.9.0] -- 2026-02-11
+
+### Added
+- `OneLocker` class with context manager support (`with OneLocker(path) as locker:`)
+
+### Changed
+- Migrated to pyproject.toml/hatchling, ruff, latest GitHub Actions
+- Modernized type hints (PEP 604) and docstrings (Google style)
+- Dropped Python 3.9; added Python 3.14
+- `is_command_callable` uses `shutil.which()` instead of `os.system()`
+- `_create_lock` is now iterative with retry limit (was unbounded recursion)
+- `wait_for_lock` progress dots go to stderr instead of stdout
+- `convert_value` passes through `None`/`bool`/`int`/`float` directly
+- `is_url` regex compiled once at module level
+
+### Fixed
+- Shell injection in `is_command_callable`
+- Signal handler leak in `read_lock`/`write_lock` context managers
+- ThreeLocker SIGTERM handler crash
+- `read_lock()`/`_lock()` returning True when locking actually fails
+- `read_unlock()` while write lock held now raises `RuntimeError`
+- `deep_update` crash replacing scalar with nested dict
+- `TmpEnv` destroying pre-existing env vars on exit
+- `arg_defaults(unique=True)` only returning first subcommand's defaults
+- `wait_max=0` treated as falsy in `create_read_lock`/`create_write_lock`
+- `is_writable` infinite recursion and failure on nested paths
+- Mutable default argument in `parse_registry_path`
+- `tarfile.extractall()` deprecation warning on Python 3.12+
+
+### Removed
+- `build_cli_extra()` and `asciify_dict()` functions
+- Legacy packaging files (setup.py, setup.cfg, MANIFEST.in, requirements/)
+
 ## [0.8.2] -- 2025-12-01
 
 ### Changed

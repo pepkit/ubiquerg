@@ -1,7 +1,6 @@
 """Environment-related utilities"""
 
 import os
-from typing import Any, Optional
 from types import TracebackType
 
 __author__ = "Vince Reuter"
@@ -22,6 +21,10 @@ class TmpEnv(object):
                 )
                 raise ValueError(msg)
         self._kvs = kwargs
+        self._originals = {}
+        for k in kwargs:
+            if k in os.environ:
+                self._originals[k] = os.environ[k]
 
     def __enter__(self) -> "TmpEnv":
         for k, v in self._kvs.items():
@@ -30,12 +33,15 @@ class TmpEnv(object):
 
     def __exit__(
         self,
-        exc_type: Optional[type],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
+        exc_type: type | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
     ) -> None:
         for k in self._kvs:
-            try:
-                del os.environ[k]
-            except KeyError:
-                pass
+            if k in self._originals:
+                os.environ[k] = self._originals[k]
+            else:
+                try:
+                    del os.environ[k]
+                except KeyError:
+                    pass

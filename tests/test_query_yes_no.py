@@ -4,6 +4,7 @@ import itertools
 import unittest.mock as mock
 
 import pytest
+
 from ubiquerg import query_yes_no
 
 
@@ -13,9 +14,7 @@ def pytest_generate_tests(metafunc):
         metafunc.parametrize("question", ["want to test?", "will this work?"])
 
 
-@pytest.mark.parametrize(
-    "default", [1, "a", "wontwork", [], {}, (), "Y", "N", "y", "n"]
-)
+@pytest.mark.parametrize("default", [1, "a", "wontwork", [], {}, (), "Y", "N", "y", "n"])
 def test_illegal_default_yields_value_error(question, default):
     """Illegal default response causes ValueError."""
     with pytest.raises(ValueError):

@@ -1,29 +1,23 @@
-"""Tests for rendering CLI options and arguments"""
+"""Tests for CLI tools"""
 
-from collections import OrderedDict
-import pytest
-from ubiquerg import build_cli_extra, powerset, VersionInHelpParser, convert_value
 import argparse
 
+import pytest
 
-def pytest_generate_tests(metafunc):
-    """Test case generation and parameterization for this module"""
-    if "ordwrap" in metafunc.fixturenames:
-        metafunc.parametrize("ordwrap", [tuple, OrderedDict])
+from ubiquerg import VersionInHelpParser, convert_value
 
 
 def build_parser():
-    """
-    Example argument parser, needed solely for testing purposes.
+    """Example argument parser, needed solely for testing purposes.
+
     This example parser was copied from looper/__init__.py
 
-    :return argparse.ArgumentParser
+    Returns:
+        Tuple of argument parser and message dict
     """
 
     banner = "%(prog)s - Loop through samples and submit pipelines."
-    additional_description = (
-        "For subcommand-specific options, " "type: '%(prog)s <subcommand> -h'"
-    )
+    additional_description = "For subcommand-specific options, type: '%(prog)s <subcommand> -h'"
     additional_description += "\nhttps://github.com/pepkit/looper"
 
     parser = VersionInHelpParser(
@@ -54,8 +48,7 @@ def build_parser():
         "--env",
         dest="env",
         default=None,
-        help="Environment variable that points to the DIVCFG file. "
-        "(default: DIVCFG)",
+        help="Environment variable that points to the DIVCFG file. (default: DIVCFG)",
     )
     parser.add_argument(
         "--dotfile-template",
@@ -71,8 +64,7 @@ def build_parser():
         "summarize": "Summarize statistics of project samples.",
         "destroy": "Remove all files of the project.",
         "check": "Checks flag status of current runs.",
-        "clean": "Runs clean scripts to remove intermediate "
-        "files of already processed jobs.",
+        "clean": "Runs clean scripts to remove intermediate files of already processed jobs.",
     }
 
     subparsers = parser.add_subparsers(dest="command")
@@ -105,9 +97,7 @@ def build_parser():
             default=0,
             help="Time delay in seconds between job submissions.",
         )
-        subparser.add_argument(
-            "-p", "--package", help="Name of computing resource package to use"
-        )
+        subparser.add_argument("-p", "--package", help="Name of computing resource package to use")
         subparser.add_argument(
             "--compute",
             help="Specification of individual computing resource settings; "
@@ -129,8 +119,7 @@ def build_parser():
             "--settings",
             dest="settings",
             default="",
-            help="path to a YAML-formatted settings file used to populate "
-            "the command template",
+            help="path to a YAML-formatted settings file used to populate the command template",
         )
     for subparser in [run_subparser, rerun_subparser]:
         # Note that defaults for otherwise numeric lump parameters are
@@ -148,7 +137,7 @@ def build_parser():
             "--lumpn",
             default=None,
             type=int,
-            help="Number of individual scripts grouped into " "single submission",
+            help="Number of individual scripts grouped into single submission",
         )
 
     # Other commands
@@ -186,9 +175,7 @@ def build_parser():
         clean_subparser,
         collate_subparser,
     ]:
-        subparser.add_argument(
-            "config_file", nargs="?", help="Project configuration file (YAML)."
-        )
+        subparser.add_argument("config_file", nargs="?", help="Project configuration file (YAML).")
         # subparser.add_argument(
         #         "-c", "--config", required=False, default=None,
         #         dest="looper_config", help="Looper configuration file (
@@ -244,41 +231,10 @@ def build_parser():
             "--amendments",
             dest="amendments",
             nargs="+",
-            help="Name of amendment(s) to use, as designated in the "
-            "project's configuration file",
+            help="Name of amendment(s) to use, as designated in the project's configuration file",
         )
 
     return parser, msg_by_cmd
-
-
-@pytest.mark.parametrize(
-    ["optargs", "expected"],
-    [
-        (
-            [
-                ("-X", None),
-                ("--revert", 1),
-                ("-O", "outfile"),
-                ("--execute-locally", None),
-                ("-I", ["file1", "file2"]),
-            ],
-            "-X --revert 1 -O outfile --execute-locally -I file1 file2",
-        )
-    ],
-)
-def test_build_cli_extra(optargs, expected, ordwrap):
-    """Check that CLI optargs are rendered as expected."""
-    observed = build_cli_extra(ordwrap(optargs))
-    print("expected: {}".format(expected))
-    print("observed: {}".format(observed))
-    assert expected == observed
-
-
-@pytest.mark.parametrize("optargs", powerset([(None, "a"), (1, "one")], nonempty=True))
-def test_illegal_cli_extra_input_is_exceptional(optargs, ordwrap):
-    """Non-string keys are illegal and cause a TypeError."""
-    with pytest.raises(TypeError):
-        build_cli_extra(ordwrap(optargs))
 
 
 def test_dests_by_subparser_return_type():
@@ -348,8 +304,21 @@ def test_arg_defaults_unqiue():
     parser, _ = build_parser()
     tld = parser.arg_defaults(unique=True)
     assert isinstance(tld, dict)
-    assert len(tld) == 17
+    assert len(tld) == 19
     assert len(set(tld.keys())) == len(tld.keys())
+
+
+def test_arg_defaults_unique_includes_all_subcommands():
+    """unique=True must merge defaults from ALL subcommands, not just the first."""
+    parser = VersionInHelpParser(prog="test")
+    subs = parser.add_subparsers(dest="command")
+    sub1 = subs.add_parser("first")
+    sub1.add_argument("--only-in-first", default="val1")
+    sub2 = subs.add_parser("second")
+    sub2.add_argument("--only-in-second", default="val2")
+    result = parser.arg_defaults(unique=True)
+    assert "only_in_first" in result, f"Missing first subcommand defaults: {result}"
+    assert "only_in_second" in result, f"Missing second subcommand defaults: {result}"
 
 
 @pytest.mark.parametrize(

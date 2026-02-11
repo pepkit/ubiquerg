@@ -2,8 +2,7 @@
 
 import os
 import re
-
-from typing import Any, Union, Optional
+from typing import Any
 
 from .web import is_url
 
@@ -11,7 +10,7 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
-def expandpath(path):
+def expandpath(path: str) -> str:
     """Expand a filesystem path that may or may not contain user/env vars.
 
     Args:
@@ -25,14 +24,8 @@ def expandpath(path):
 
 def parse_registry_path(
     rpstring: str,
-    defaults: list[tuple[str, Any]] = [
-        ("protocol", None),
-        ("namespace", None),
-        ("item", None),
-        ("subitem", None),
-        ("tag", None),
-    ],
-) -> Union[dict, None]:
+    defaults: list[tuple[str, Any]] | None = None,
+) -> dict | None:
     """Parse a 'registry path' string into components.
 
     A registry path is a string that is kind of like a URL, providing a unique
@@ -48,6 +41,15 @@ def parse_registry_path(
     Returns:
         dict | None: dict with one element for each parsed entry in the path
     """
+
+    if defaults is None:
+        defaults = [
+            ("protocol", None),
+            ("namespace", None),
+            ("item", None),
+            ("subitem", None),
+            ("tag", None),
+        ]
 
     # This commented regex is the same without protocol
     # ^(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$
@@ -91,7 +93,7 @@ def parse_registry_path_strict(
     require_item: bool = True,
     require_subitem: bool = False,
     require_tag: bool = False,
-) -> Union[dict[str, Any], None]:
+) -> dict[str, Any] | None:
     """Parse and validate a registry path with required component checks.
 
     This function parses a registry path and returns the parsed dictionary
@@ -145,7 +147,7 @@ def parse_registry_path_strict(
     return parsed
 
 
-def mkabs(path: str, reldir: Optional[str] = None) -> str:
+def mkabs(path: str | None, reldir: str | None = None) -> str | None:
     """Make sure a path is absolute.
 
     If not already absolute, it's made absolute relative to a given directory (or file).

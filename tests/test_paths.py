@@ -1,8 +1,10 @@
 """Tests for filesystem utilities"""
 
 import os
+
 import pytest
-from ubiquerg import expandpath, parse_registry_path, mkabs
+
+from ubiquerg import expandpath, mkabs, parse_registry_path
 
 __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
@@ -12,12 +14,12 @@ class PathTestCase(object):
     """Bundle data and expectation with context management for a test case."""
 
     def __init__(self, path, expected, **envs):
-        """
-        Create the case with raw path, expected result, and envvar updates.
+        """Create the case with raw path, expected result, and envvar updates.
 
-        :param str path: raw path value to use as input to function under test
-        :param str expected: expected result of applying function under test
-            to raw path value
+        Args:
+            path: raw path value to use as input to function under test
+            expected: expected result of applying function under test
+                to raw path value
         """
         self.path = path
         self.expected = expected
@@ -44,9 +46,7 @@ class PathTestCase(object):
 
     def __repr__(self):
         """Conveniently represent the test case instance."""
-        return "Path={}, Exp={}, Envs={}".format(
-            self.path, self.expected, self._updates
-        )
+        return "Path={}, Exp={}, Envs={}".format(self.path, self.expected, self._updates)
 
 
 @pytest.mark.parametrize(
@@ -85,7 +85,7 @@ def test_expandpath_doubleslash(case):
 def test_parse_reg():
     pvars = parse_registry_path("abc")
     assert pvars["item"] == "abc"
-    assert parse_registry_path("http://big.databio.org/bulker/bulker/demo.yaml") == None
+    assert parse_registry_path("http://big.databio.org/bulker/bulker/demo.yaml") is None
 
 
 @pytest.mark.parametrize(

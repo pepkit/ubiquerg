@@ -1,12 +1,19 @@
-import errno
+import functools
 import glob
 import logging
 import os
-
 from contextlib import contextmanager
-from .files import wait_for_lock, create_file_racefree
-from signal import signal, SIGINT, SIGTERM
-from typing import Union
+from signal import SIGINT, SIGTERM, getsignal, signal
+
+from .files import (
+    _create_lock,
+    create_file_racefree,
+    create_lock,
+    make_lock_path,
+    remove_lock,
+    wait_for_lock,
+)
+from .paths import mkabs
 
 PID = os.getpid()
 READ = f"read-{PID}"
@@ -29,9 +36,7 @@ class ThreeLocker(object):
     It creates lock files in the same directory as the file to be locked.
     """
 
-    def __init__(
-        self, filepath: str, wait_max: int = 10, strict_ro_locks: bool = False
-    ):
+    def __init__(self, filepath: str, wait_max: int = 10, strict_ro_locks: bool = False):
         self.wait_max = wait_max
         self.strict_ro_locks = strict_ro_locks
         self.set_file_path(filepath)
@@ -57,7 +62,7 @@ class ThreeLocker(object):
             return True
         lock_path = self.lock_paths[READ]
         if not ensure_write_access(lock_path, self.strict_ro_locks):
-            return True
+            return False
 
         self.create_read_lock(self.filepath, self.wait_max)
         self.locked[READ] = True
@@ -81,6 +86,8 @@ class ThreeLocker(object):
         if not self.filepath:
             _LOGGER.warning("No filepath, no need to unlock.")
             return True
+        if self.locked[WRITE]:
+            raise RuntimeError("Cannot read_unlock while write lock is held; use write_unlock()")
         _remove_lock(self.lock_paths[READ])
         self.locked[READ] = False
         return True
@@ -102,8 +109,8 @@ class ThreeLocker(object):
             filepath: path to a file to lock
             wait_max: max wait time if the file in question is already locked
         """
-        filepath = filepath or self.filepath
-        wait_max = wait_max or self.wait_max
+        filepath = self.filepath if filepath is None else filepath
+        wait_max = self.wait_max if wait_max is None else wait_max
         wait_for_lock(self.lock_paths[UNIVERSAL], wait_max)
         _create_lock(self.lock_paths[UNIVERSAL], filepath, wait_max)
         wait_for_lock(self.lock_paths[WRITE], wait_max)
@@ -117,8 +124,8 @@ class ThreeLocker(object):
             filepath: path to a file to lock
             wait_max: max wait time if the file in question is already locked
         """
-        filepath = filepath or self.filepath
-        wait_max = wait_max or self.wait_max
+        filepath = self.filepath if filepath is None else filepath
+        wait_max = self.wait_max if wait_max is None else wait_max
         wait_for_lock(self.lock_paths[UNIVERSAL], wait_max)
         _create_lock(self.lock_paths[UNIVERSAL], filepath, wait_max)
         read_lock_paths = glob.glob(
@@ -131,16 +138,9 @@ class ThreeLocker(object):
         _remove_lock(self.lock_paths[UNIVERSAL])
 
     def _interrupt_handler(self, signal_received, frame):
-        if signal_received == SIGINT:
-            _LOGGER.warning(f"Received SIGINT, unlocking file and exiting...")
+        if signal_received in (SIGINT, SIGTERM):
+            _LOGGER.warning(f"Received {signal_received.name}, unlocking file and exiting...")
             self.write_unlock()
-            self.read_unlock()
-            raise SystemExit
-        if signal_received == SIGTERM:
-            _LOGGER.warning(f"Received SIGTERM, unlocking file and exiting...")
-            self.__exit__(None, None, None)
-            self.write_unlock()
-            self.read_unlock()
             raise SystemExit
 
     def __repr__(self) -> str:
@@ -161,16 +161,17 @@ class ThreeLocker(object):
                 self.read_unlock()
 
 
-def ensure_locked(type: str = WRITE):  # decorator factory
+def ensure_locked(lock_type: str = WRITE):  # decorator factory
     """Decorator to apply to functions to make sure they only happen when locked."""
 
     def decorator(func):
+        @functools.wraps(func)
         def inner_func(self, *args, **kwargs):
             if not self.locker:
                 raise OSError("File not lockable. File locker not provided.")
-            if not self.locker.locked[type]:
+            if not self.locker.locked[lock_type]:
                 raise OSError(
-                    f"This function must use a context manager to {type}-lock the file"
+                    f"This function must use a context manager to {lock_type}-lock the file"
                 )
 
             return func(self, *args, **kwargs)
@@ -181,7 +182,7 @@ def ensure_locked(type: str = WRITE):  # decorator factory
 
 
 @contextmanager
-def read_lock(obj: Union[str, object]) -> object:
+def read_lock(obj: object) -> object:
     """Read-lock a filepath or object with locker attribute.
 
     Args:
@@ -190,7 +191,7 @@ def read_lock(obj: Union[str, object]) -> object:
     Yields:
         object: the locked object
     """
-    if type(obj) == str:
+    if isinstance(obj, str):
         locker = ThreeLocker(obj)
     elif hasattr(obj, "locker"):
         locker = obj.locker
@@ -198,7 +199,11 @@ def read_lock(obj: Union[str, object]) -> object:
         raise AttributeError(f"Cannot lock: {obj}.")
 
     # handle a premature Ctrl+C exit from this context manager
+    old_sigterm = None
+    old_sigint = None
     try:
+        old_sigterm = getsignal(SIGTERM)
+        old_sigint = getsignal(SIGINT)
         signal(SIGTERM, locker._interrupt_handler)
         signal(SIGINT, locker._interrupt_handler)
         # If this is run in a thread, the signal module is not available and raises an exception.
@@ -213,10 +218,16 @@ def read_lock(obj: Union[str, object]) -> object:
         yield obj
     finally:
         locker.read_unlock()
+        if old_sigterm is not None:
+            try:
+                signal(SIGTERM, old_sigterm)
+                signal(SIGINT, old_sigint)
+            except ValueError:
+                pass
 
 
 @contextmanager
-def write_lock(obj: Union[str, object]) -> object:
+def write_lock(obj: object) -> object:
     """Write-lock file path or object with locker attribute.
 
     Args:
@@ -225,7 +236,7 @@ def write_lock(obj: Union[str, object]) -> object:
     Yields:
         object: the locked object
     """
-    if type(obj) == str:
+    if isinstance(obj, str):
         locker = ThreeLocker(obj)
     elif hasattr(obj, "locker"):
         locker = obj.locker
@@ -233,7 +244,11 @@ def write_lock(obj: Union[str, object]) -> object:
         raise AttributeError(f"Cannot lock: {obj}.")
 
     # handle a premature Ctrl+C exit from this context manager
+    old_sigterm = None
+    old_sigint = None
     try:
+        old_sigterm = getsignal(SIGTERM)
+        old_sigint = getsignal(SIGINT)
         signal(SIGTERM, locker._interrupt_handler)
         signal(SIGINT, locker._interrupt_handler)
     except ValueError as e:
@@ -244,6 +259,12 @@ def write_lock(obj: Union[str, object]) -> object:
         yield obj
     finally:
         locker.write_unlock()
+        if old_sigterm is not None:
+            try:
+                signal(SIGTERM, old_sigterm)
+                signal(SIGINT, old_sigint)
+            except ValueError:
+                pass
 
 
 def locked_read_file(filepath, create_file: bool = False) -> str:
@@ -271,7 +292,7 @@ def locked_read_file(filepath, create_file: bool = False) -> str:
     return file_contents
 
 
-def wait_for_locks(lock_paths: Union[list, str], wait_max: int = 10):
+def wait_for_locks(lock_paths: list | str, wait_max: int = 10):
     """Wait for lock files to be removed.
 
     Args:
@@ -284,7 +305,7 @@ def wait_for_locks(lock_paths: Union[list, str], wait_max: int = 10):
         wait_for_lock(lock_path, wait_max)
 
 
-def ensure_write_access(lock_path, strict_ro_locks=False):
+def ensure_write_access(lock_path: str, strict_ro_locks: bool = False) -> bool:
     if os.access(os.path.dirname(lock_path), os.W_OK):  # write access
         return True
     else:
@@ -292,36 +313,10 @@ def ensure_write_access(lock_path, strict_ro_locks=False):
             raise OSError(f"No write access to '{lock_path}'; can't lock file.")
         else:  # warn; no write access, non-strict mode
             _LOGGER.warning(f"No write access to '{lock_path}'; can't lock file.")
-            return True
+            return False
 
 
-def _create_lock(lock_path, filepath, wait_max) -> None:
-    # _LOGGER.debug(f"Creating lock for {filepath} at {lock_path}")
-    _LOGGER.debug(f"Creating lock at {os.path.basename(lock_path)}")
-    try:
-        create_file_racefree(lock_path)
-    except FileNotFoundError:
-        parent_dir = os.path.dirname(filepath)
-        os.makedirs(parent_dir)
-        _create_lock(lock_path, filepath, wait_max)
-    except Exception as e:
-        if e.errno == errno.EEXIST:
-            # Rare case: file already exists;
-            # the lock has been created in the split second since the
-            # last lock existence check,
-            # wait for the lock file to be gone, but no longer than
-            # `wait_max`.
-            _LOGGER.info(
-                "The lock has been created in the split second since the "
-                "last lock existence check. Waiting"
-            )
-            wait_for_lock(lock_path, wait_max)
-            _create_lock(lock_path, filepath, wait_max)
-        else:
-            raise e
-
-
-def _remove_lock(lock_path) -> bool:
+def _remove_lock(lock_path: str) -> bool:
     """Remove lock.
 
     Args:
@@ -331,13 +326,14 @@ def _remove_lock(lock_path) -> bool:
         bool: whether the lock was found and removed
     """
     _LOGGER.debug(f"Removing lock at {os.path.basename(lock_path)}")
-    if os.path.exists(lock_path):
+    try:
         os.remove(lock_path)
         return True
-    return False
+    except FileNotFoundError:
+        return False
 
 
-def make_all_lock_paths(filepath):
+def make_all_lock_paths(filepath: str) -> dict[str, str]:
     """
     Create a collection of paths to lock files with given name as base.
     """
@@ -350,72 +346,84 @@ def make_all_lock_paths(filepath):
     return lock_paths
 
 
-def mkabs(path, reldir=None):
-    """Make sure a path is absolute.
+class OneLocker:
+    """A simple mutual-exclusion file locker.
 
-    If not already absolute, it's made absolute relative to a given directory.
-    Also expands ~ and environment variables for kicks.
-
-    Args:
-        path: Path to make absolute
-        reldir: Relative directory to make path absolute from if it's not already absolute
-
-    Returns:
-        str: Absolute path
+    Uses a single lock file for exclusive access. Unlike ThreeLocker,
+    this does not distinguish between read and write locks — any lock
+    is exclusive. Simpler and sufficient when concurrent readers are
+    not needed.
     """
 
-    def xpand(path):
-        return os.path.expandvars(os.path.expanduser(path))
+    def __init__(self, filepath: str, wait_max: int = 10, strict_ro_locks: bool = False):
+        self.wait_max = wait_max
+        self.strict_ro_locks = strict_ro_locks
+        self.set_file_path(filepath)
+        self.locked = {READ: False, WRITE: False}
 
-    if os.path.isabs(xpand(path)):
-        return xpand(path)
+    @property
+    def filepath(self) -> str:
+        return self._filepath
 
-    if not reldir:
-        return os.path.abspath(xpand(path))
+    def set_file_path(self, filepath: str) -> str:
+        if filepath:
+            self._filepath = mkabs(filepath)
+            self.lock_path = make_lock_path(self.filepath)
+        else:
+            self._filepath = None
+            self.lock_path = None
+        return self._filepath
 
-    return os.path.join(xpand(reldir), xpand(path))
+    def read_lock(self) -> bool:
+        return self._lock()
 
+    def write_lock(self) -> bool:
+        return self._lock()
 
-# class OneLocker(object):
-# def lock(self, type=READ):
-#     if not self.filepath:
-#         _LOGGER.warning("No filepath, no need to lock.")
-#         return True
+    def read_unlock(self) -> bool:
+        return self._unlock()
 
-#     # Check for permissions to write a lock file
-#     lock_path = self.lock_paths[type]
+    def write_unlock(self) -> bool:
+        return self._unlock()
 
-#     if not os.access(os.path.dirname(lock_path), os.W_OK):
-#         if self.strict_ro_locks:
-#             raise OSError(f"No write access to '{lock_path}'; can't lock file.")
-#         else:
-#             _LOGGER.warning(f"No write access to '{lock_path}'; can't lock file.")
-#             self.locked[type] = True
-#             return True
+    def _lock(self) -> bool:
+        if not self.filepath:
+            _LOGGER.warning("No filepath, no need to lock.")
+            return True
+        if not ensure_write_access(self.lock_path, self.strict_ro_locks):
+            return False
+        create_lock(self.filepath, self.wait_max)
+        self.locked[READ] = True
+        self.locked[WRITE] = True
+        return True
 
-#     create_lock(self.filepath, self.wait_max)
-#     self.locked[type] = True
-#     return True
+    def _unlock(self) -> bool:
+        if not self.filepath:
+            _LOGGER.warning("No filepath, no need to unlock.")
+            return True
+        remove_lock(self.filepath)
+        self.locked[READ] = False
+        self.locked[WRITE] = False
+        return True
 
-# def unlock(self, type=READ):
-#     if not self.filepath:
-#         _LOGGER.warning("No filepath, no need to unlock.")
-#         return True
+    def _interrupt_handler(self, signal_received, frame):
+        if signal_received in (SIGINT, SIGTERM):
+            _LOGGER.warning(f"Received {signal_received.name}, unlocking file and exiting...")
+            self._unlock()
+            raise SystemExit
 
-#     # Check for permissions to write a lock file
-#     lock_path = make_lock_path(self.filepath)
-#     if not os.access(os.path.dirname(lock_path), os.W_OK):
-#         if self.strict_ro_locks:
-#             raise OSError(f"No write access to '{lock_path}' can't lock file.")
-#         else:
-#             _LOGGER.warning(f"No write access to '{lock_path}' can't lock file.")
-#             self.locked = False
-#             return True
+    def __enter__(self):
+        self._lock()
+        return self
 
-#     remove_lock(self.filepath)
-#     self.locked = False
-#     return True
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.locked[READ] or self.locked[WRITE]:
+            self._unlock()
+        return False
 
-# def __del__(self):
-#     if self.filepath and self.locked:
-#         self.unlock()
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({{'filepath': {self.filepath!r}, 'wait_max': {self.wait_max}, 'locked': {self.locked}, 'strict_ro_locks': {self.strict_ro_locks}}})"
+
+    def __del__(self) -> None:
+        if self.filepath and (self.locked[READ] or self.locked[WRITE]):
+            self._unlock()

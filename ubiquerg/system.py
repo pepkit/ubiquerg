@@ -1,8 +1,8 @@
 """System utility functions"""
 
 import os
+import shutil
 import subprocess
-from typing import Optional
 
 __author__ = "Databio Lab"
 __email__ = "nathan@code.databio.org"
@@ -24,9 +24,7 @@ def is_command_callable(cmd: str) -> bool:
         ValueError: if the alleged command is empty
     """
     if not isinstance(cmd, str):
-        raise TypeError(
-            "Alleged command isn't a string: {} ({})".format(cmd, type(cmd))
-        )
+        raise TypeError("Alleged command isn't a string: {} ({})".format(cmd, type(cmd)))
     if not cmd:
         raise ValueError("Empty command to check for callability")
     if os.path.isdir(cmd) or (os.path.isfile(cmd) and not os.access(cmd, os.X_OK)):
@@ -44,14 +42,10 @@ def is_command_callable(cmd: str) -> bool:
         except subprocess.CalledProcessError:
             return False
     else:
-        # Use `command` to see if command is callable, and rule on exit code.
-        check = "command -v {0} >/dev/null 2>&1 || {{ exit 1; }}".format(cmd)
-        return not bool(os.system(check))
+        return shutil.which(cmd) is not None
 
 
-def is_writable(
-    folder: Optional[str], check_exist: bool = False, create: bool = False
-) -> bool:
+def is_writable(folder: str | None, check_exist: bool = False, create: bool = False) -> bool:
     """Make sure a folder is writable.
 
     Given a folder, check that it exists and is writable. Errors if requested on
@@ -68,11 +62,12 @@ def is_writable(
     if os.path.exists(folder):
         return os.access(folder, os.W_OK) and os.access(folder, os.X_OK)
     elif create:
-        os.mkdir(folder)
+        os.makedirs(folder, exist_ok=True)
         return True
     elif check_exist:
         raise OSError("Folder not found: {}".format(folder))
     else:
-        # The folder didn't exist. Recurse up the folder hierarchy to make sure
-        # all paths are writable
-        return is_writable(os.path.dirname(folder), check_exist)
+        parent = os.path.dirname(folder)
+        if not parent or parent == folder:
+            return False
+        return is_writable(parent, check_exist)
