@@ -238,3 +238,11 @@ def test_powerset_illegal_input(arbwrap, kwargs, exp_err, pool):
 @pytest.mark.parametrize(["x", "y"], [({"a": 1}, {"b": 2}), ({"a": 1, "c": 2}, {"b": 2})])
 def test_merging_dicts(x, y):
     assert "a" in list(merge_dicts(x, y).keys())
+
+
+def test_deep_update_replace_scalar_with_dict():
+    """Replacing a scalar value with a nested dict should not crash."""
+    old = {"a": "string_value", "b": 1}
+    new = {"a": {"nested": "dict"}, "b": {"also": "nested"}}
+    deep_update(old, new)
+    assert old == {"a": {"nested": "dict"}, "b": {"also": "nested"}}

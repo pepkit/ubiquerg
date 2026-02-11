@@ -32,6 +32,7 @@ test = ["pytest"]
 [tool.pytest.ini_options]
 addopts = "-rfE"
 testpaths = ["tests"]
+markers = ["benchmark: locker performance benchmark tests"]
 python_files = "test_*.py"
 python_classes = "Test* *Test *Tests *Tester"
 python_functions = "test_* test[A-Z]*"
@@ -46,3 +47,4 @@ ignore = ["E501"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["F403", "F405"]
+"benchmarks/*" = ["E402"]

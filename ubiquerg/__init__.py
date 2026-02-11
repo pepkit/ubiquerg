@@ -7,7 +7,6 @@ Version is defined in pyproject.toml. To get it at runtime:
 
 from .cli_tools import (
     VersionInHelpParser,
-    build_cli_extra,
     convert_value,
     query_yes_no,
 )
@@ -16,6 +15,7 @@ from .environment import TmpEnv
 from .file_locking import (
     READ,
     WRITE,
+    OneLocker,
     ThreeLocker,
     ensure_locked,
     ensure_write_access,
@@ -38,10 +38,9 @@ from .files import (
 )
 from .paths import expandpath, mkabs, parse_registry_path, parse_registry_path_strict
 from .system import is_command_callable, is_writable
-from .web import is_url
+from .web import has_scheme, is_url
 
 __all__ = [
-    "build_cli_extra",
     "checksum",
     "convert_value",
     "create_file_racefree",
@@ -51,6 +50,7 @@ __all__ = [
     "ensure_write_access",
     "expandpath",
     "filesize_to_str",
+    "has_scheme",
     "is_collection_like",
     "is_command_callable",
     "is_url",
@@ -60,6 +60,7 @@ __all__ = [
     "make_lock_path",
     "merge_dicts",
     "mkabs",
+    "OneLocker",
     "parse_registry_path",
     "parse_registry_path_strict",
     "powerset",

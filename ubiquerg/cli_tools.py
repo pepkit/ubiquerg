@@ -8,13 +8,12 @@ from argparse import (
     _SubParsersAction,
     _VersionAction,
 )
-from collections.abc import Iterable
 from typing import Any
 
-from .collection import is_collection_like, merge_dicts
+from .collection import merge_dicts
 
 __classes__ = ["VersionInHelpParser"]
-__all__ = __classes__ + ["build_cli_extra", "query_yes_no", "convert_value"]
+__all__ = __classes__ + ["query_yes_no", "convert_value"]
 
 
 class VersionInHelpParser(ArgumentParser):
@@ -163,47 +162,12 @@ class VersionInHelpParser(ArgumentParser):
                 if hasattr(action, "default") and hasattr(action, "dest"):
                     defaults_dict.update({action.dest: action.default})
             defaults[subcmd] = defaults_dict
-            if unique:
-                unique_defaults = {}
-                for k, v in defaults.items():
-                    unique_defaults = merge_dicts(unique_defaults, v)
-                return unique_defaults
+        if unique:
+            unique_defaults = {}
+            for k, v in defaults.items():
+                unique_defaults = merge_dicts(unique_defaults, v)
+            return unique_defaults
         return defaults
-
-
-def build_cli_extra(optargs: dict[str, Any] | Iterable) -> str:
-    """Render CLI options/args as text to add to base command.
-
-    To specify a flag, map an option to None. Otherwise, map option short or
-    long name to value(s). Values that are collection types will be rendered
-    with single space between each. All non-string values are converted to
-    string.
-
-    Args:
-        optargs: values used as options/arguments
-
-    Returns:
-        str: text to add to base command, based on given opts/args
-
-    Raises:
-        TypeError: if an option name isn't a string
-    """
-
-    def render(k, v):
-        if not isinstance(k, str):
-            raise TypeError("Option name isn't a string: {} ({})".format(k, type(k)))
-        if v is None:
-            return k
-        if is_collection_like(v):
-            v = " ".join(map(str, v))
-        return "{} {}".format(k, v)
-
-    try:
-        data_iter = optargs.items()
-    except AttributeError:
-        data_iter = optargs
-
-    return " ".join(render(*kv) for kv in data_iter)
 
 
 def query_yes_no(question: str, default: str = "no") -> bool:
@@ -231,7 +195,7 @@ def query_yes_no(question: str, default: str = "no") -> bool:
         sys.stdout.write(msg)
         try:
             return parse(input() or default)
-        except KeyError:
+        except (KeyError, AttributeError):
             sys.stdout.write("Please respond with 'yes' or 'no' (or 'y' or 'n').\n")
 
 
@@ -246,6 +210,10 @@ def convert_value(val: Any) -> bool | str | int | float | None:
     Returns:
         bool | str | int | float | None: converted string to the most appropriate type
     """
+    if val is None:
+        return None
+    if isinstance(val, (bool, int, float)):
+        return val
     if not isinstance(val, str):
         try:
             val = str(val)

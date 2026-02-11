@@ -11,7 +11,6 @@ import ubiquerg
     ["obj_name", "typecheck"],
     [
         # cli_tools
-        ("build_cli_extra", isfunction),
         ("convert_value", isfunction),
         ("query_yes_no", isfunction),
         ("VersionInHelpParser", isclass),
@@ -28,6 +27,7 @@ import ubiquerg
         ("ensure_write_access", isfunction),
         ("locked_read_file", isfunction),
         ("make_all_lock_paths", isfunction),
+        ("OneLocker", isclass),
         ("read_lock", isfunction),
         ("ThreeLocker", isclass),
         ("wait_for_locks", isfunction),

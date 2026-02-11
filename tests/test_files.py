@@ -8,6 +8,10 @@ from tempfile import mkdtemp
 import pytest
 
 from ubiquerg import (
+    READ,
+    WRITE,
+    OneLocker,
+    ThreeLocker,
     checksum,
     create_file_racefree,
     create_lock,
@@ -127,3 +131,175 @@ class TestLocking:
         remove_lock(os.path.join(td, fn))
         locks_list = [os.path.join(td, f) for f in os.listdir(td) if f.startswith("lock.")]
         assert len(locks_list) == 0
+
+
+class TestOneLocker:
+    def test_filepath_is_absolute(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        assert os.path.isabs(locker.filepath)
+
+    def test_initial_state_unlocked(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        assert locker.locked[READ] is False
+        assert locker.locked[WRITE] is False
+
+    def test_read_lock_creates_lock_file(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        locker.read_lock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock.")]
+        assert len(locks) == 1
+        assert locker.locked[READ] is True
+        assert locker.locked[WRITE] is True
+        locker.read_unlock()
+
+    def test_write_lock_creates_lock_file(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        locker.write_lock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock.")]
+        assert len(locks) == 1
+        assert locker.locked[READ] is True
+        assert locker.locked[WRITE] is True
+        locker.write_unlock()
+
+    def test_unlock_removes_lock_file(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        locker.write_lock()
+        locker.write_unlock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock.")]
+        assert len(locks) == 0
+        assert locker.locked[READ] is False
+        assert locker.locked[WRITE] is False
+
+    def test_del_cleans_up(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        locker.write_lock()
+        locker.__del__()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock.")]
+        assert len(locks) == 0
+
+    def test_no_filepath_lock_succeeds(self):
+        locker = OneLocker("")
+        assert locker.read_lock() is True
+        assert locker.write_lock() is True
+        assert locker.read_unlock() is True
+        assert locker.write_unlock() is True
+
+    def test_repr(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = OneLocker(fp)
+        r = repr(locker)
+        assert "OneLocker" in r
+        assert "test.yaml" in r
+
+
+class TestThreeLocker:
+    def test_filepath_is_absolute(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        assert os.path.isabs(locker.filepath)
+
+    def test_initial_state_unlocked(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        assert locker.locked[READ] is False
+        assert locker.locked[WRITE] is False
+
+    def test_read_lock_creates_lock_files(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.read_lock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) >= 1
+        assert locker.locked[READ] is True
+        locker.read_unlock()
+
+    def test_write_lock_creates_lock_files(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.write_lock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) >= 2
+        assert locker.locked[READ] is True
+        assert locker.locked[WRITE] is True
+        locker.write_unlock()
+
+    def test_write_unlock_removes_all_locks(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.write_lock()
+        locker.write_unlock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) == 0
+        assert locker.locked[READ] is False
+        assert locker.locked[WRITE] is False
+
+    def test_read_unlock_removes_read_lock(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.read_lock()
+        locker.read_unlock()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) == 0
+        assert locker.locked[READ] is False
+
+    def test_del_cleans_up(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.write_lock()
+        locker.__del__()
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) == 0
+
+    def test_no_filepath_lock_succeeds(self):
+        locker = ThreeLocker("")
+        assert locker.read_lock() is True
+        assert locker.write_lock() is True
+        assert locker.read_unlock() is True
+        assert locker.write_unlock() is True
+
+    def test_repr(self, tmpdir):
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        r = repr(locker)
+        assert "ThreeLocker" in r
+        assert "test.yaml" in r
+
+    def test_interrupt_handler_sigterm_no_crash(self, tmpdir):
+        """SIGTERM handler must clean up locks, not crash."""
+        import signal
+
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.write_lock()
+        with pytest.raises(SystemExit):
+            locker._interrupt_handler(signal.SIGTERM, None)
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) == 0
+
+    def test_interrupt_handler_sigint_no_crash(self, tmpdir):
+        """SIGINT handler must clean up locks, not crash."""
+        import signal
+
+        fp = os.path.join(tmpdir.strpath, "test.yaml")
+        locker = ThreeLocker(fp)
+        locker.write_lock()
+        with pytest.raises(SystemExit):
+            locker._interrupt_handler(signal.SIGINT, None)
+        locks = [f for f in os.listdir(tmpdir.strpath) if f.startswith("lock")]
+        assert len(locks) == 0
+
+
+class TestEnsureWriteAccess:
+    def test_ensure_write_access_returns_false_for_readonly(self, tmp_path):
+        """Non-strict mode should return False (not True) when no write access."""
+        from ubiquerg.file_locking import ensure_write_access
+
+        fake_lock_path = "/nonexistent_dir_xyz/lock-write-test.yaml"
+        result = ensure_write_access(fake_lock_path, strict_ro_locks=False)
+        assert result is False

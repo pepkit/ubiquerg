@@ -37,7 +37,7 @@ def checksum(path: str, blocksize: int = int(2e9)) -> str:
     Returns:
         str: checksum hash
     """
-    m = md5()
+    m = md5(usedforsecurity=False)
     with open(path, "rb") as f:
         while True:
             buf = f.read(blocksize)
@@ -80,7 +80,7 @@ def size(path: str | list[str], size_str: bool = True) -> int | str | None:
     else:
         warn("size could not be determined for: {}".format(path))
         s = None
-    return filesize_to_str(s) if size_str else s
+    return filesize_to_str(s) if size_str and s is not None else s
 
 
 def filesize_to_str(size: int | float) -> str | int | float:
@@ -106,18 +106,29 @@ def untar(src: str, dst: str) -> None:
 
     All the required directories will be created.
 
+    Note: We intentionally use extractall() without filter="data" here.
+    Python 3.12+ (PEP 706) added filter="data" which hardens extraction
+    by rejecting absolute paths, path traversal, setuid bits, and absolute
+    symlinks. However, some refgenie server archives contain absolute
+    symlinks to parent assets (e.g., bwa_index symlinks to the fasta file
+    using the build server's absolute path). These are always broken on
+    the client, but filter="data" crashes on them with AbsoluteLinkError
+    instead of just extracting the broken symlink.
+
+    Until refgenie's archive creation is fixed to stop including absolute
+    symlinks, we use vanilla extractall. Once that's resolved, this should
+    switch to filter="data" (or a custom filter that skips absolute
+    symlinks) for the security hardening it provides.
+
     Args:
         src: path to unpack
         dst: path to output folder
     """
     with topen(src) as tf:
-        if sys.version_info >= (3, 12):
-            tf.extractall(path=dst, filter="data")
-        else:
-            tf.extractall(path=dst)
+        tf.extractall(path=dst)
 
 
-def get_file_mod_time(pth: str) -> float:
+def _get_file_mod_time(pth: str) -> float:
     """Safely get last modification time for a file.
 
     Prevents situation when file is deleted between file existence check and
@@ -152,28 +163,28 @@ def wait_for_lock(lock_file: str, wait_max: int = 30) -> None:
     totaltime = 0
     ori_timestamp = None
     if os.path.isfile(lock_file):
-        ori_timestamp = get_file_mod_time(lock_file)
+        ori_timestamp = _get_file_mod_time(lock_file)
     while os.path.isfile(lock_file):
         if first_message_flag is False:
             _LOGGER.info(f"Waiting for file lock: {os.path.basename(lock_file)}")
             # sys.stdout.write("Waiting for file lock: {} ".format(os.path.basename(lock_file)))
             first_message_flag = True
         else:
-            sys.stdout.write(".")
+            sys.stderr.write(".")
             dot_count += 1
             if dot_count % 60 == 0:
-                sys.stdout.write("")
-        sys.stdout.flush()
+                sys.stderr.write("")
+        sys.stderr.flush()
         time.sleep(sleeptime)
         totaltime += sleeptime
         sleeptime = min((sleeptime + 0.1) * 1.25, 10)
         if totaltime >= wait_max:
             if os.path.isfile(lock_file):
-                timestamp = get_file_mod_time(lock_file)
+                timestamp = _get_file_mod_time(lock_file)
                 if ori_timestamp and timestamp > ori_timestamp:
                     ori_timestamp = timestamp
                     totaltime = 0
-                    sleeptime = 0
+                    sleeptime = 0.001
                     continue
                 raise RuntimeError(
                     "The maximum wait time ({}) has been reached and the lock "
@@ -234,34 +245,32 @@ def remove_lock(filepath: str) -> bool:
         bool: whether the lock was found and removed
     """
     lock = make_lock_path(filepath)
-    if os.path.exists(lock):
+    try:
         os.remove(lock)
         return True
-    return False
+    except FileNotFoundError:
+        return False
 
 
 def _create_lock(lock_path: str, filepath: str, wait_max: int) -> None:
-    try:
-        create_file_racefree(lock_path)
-    except FileNotFoundError:
-        parent_dir = os.path.dirname(filepath)
-        os.makedirs(parent_dir)
-        _create_lock(lock_path, filepath, wait_max)
-    except Exception as e:
-        if e.errno == errno.EEXIST:
-            # Rare case: file already exists;
-            # the lock has been created in the split second since the
-            # last lock existence check,
-            # wait for the lock file to be gone, but no longer than
-            # `wait_max`.
-            _LOGGER.info(
-                "The lock has been created in the split second since the "
-                "last lock existence check. Waiting"
-            )
-            wait_for_lock(lock_path, wait_max)
-            _create_lock(lock_path, filepath, wait_max)
-        else:
-            raise e
+    max_retries = 5
+    for attempt in range(max_retries):
+        try:
+            create_file_racefree(lock_path)
+            return
+        except FileNotFoundError:
+            parent_dir = os.path.dirname(lock_path)
+            os.makedirs(parent_dir, exist_ok=True)
+        except OSError as e:
+            if e.errno == errno.EEXIST:
+                _LOGGER.info(
+                    "The lock has been created in the split second since the "
+                    "last lock existence check. Waiting"
+                )
+                wait_for_lock(lock_path, wait_max)
+            else:
+                raise
+    raise OSError(f"Failed to create lock file after {max_retries} attempts: {lock_path}")
 
 
 def create_lock(filepath: str, wait_max: int = 10) -> None:

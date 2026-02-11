@@ -15,6 +15,7 @@ __all__ = [
     "powerset",
     "merge_dicts",
     "deep_update",
+    "uniqify",
 ]
 
 
@@ -33,22 +34,18 @@ def merge_dicts(x: dict[Any, Any], y: dict[Any, Any]) -> dict[Any, Any]:
     return z
 
 
-def deep_update(old: dict[Any, Any], new: Mapping[Any, Any]) -> dict[Any, Any]:
-    """Recursively update nested dict, modifying source.
+def deep_update(old: dict[Any, Any], new: Mapping[Any, Any]) -> None:
+    """Recursively update nested dict, modifying in place.
 
     Args:
         old: dict to update
         new: dict with new values
-
-    Returns:
-        dict: updated dict
     """
     for key, value in new.items():
-        if isinstance(value, Mapping) and value:
-            old[key] = deep_update(old.get(key, {}), value)
+        if isinstance(value, Mapping) and value and isinstance(old.get(key), Mapping):
+            deep_update(old[key], value)
         else:
             old[key] = new[key]
-    return old
 
 
 def is_collection_like(c: Any) -> bool:

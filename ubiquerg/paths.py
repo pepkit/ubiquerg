@@ -10,7 +10,7 @@ __author__ = "Vince Reuter"
 __email__ = "vreuter@virginia.edu"
 
 
-def expandpath(path):
+def expandpath(path: str) -> str:
     """Expand a filesystem path that may or may not contain user/env vars.
 
     Args:
@@ -24,13 +24,7 @@ def expandpath(path):
 
 def parse_registry_path(
     rpstring: str,
-    defaults: list[tuple[str, Any]] = [
-        ("protocol", None),
-        ("namespace", None),
-        ("item", None),
-        ("subitem", None),
-        ("tag", None),
-    ],
+    defaults: list[tuple[str, Any]] | None = None,
 ) -> dict | None:
     """Parse a 'registry path' string into components.
 
@@ -47,6 +41,15 @@ def parse_registry_path(
     Returns:
         dict | None: dict with one element for each parsed entry in the path
     """
+
+    if defaults is None:
+        defaults = [
+            ("protocol", None),
+            ("namespace", None),
+            ("item", None),
+            ("subitem", None),
+            ("tag", None),
+        ]
 
     # This commented regex is the same without protocol
     # ^(?:([0-9a-zA-Z_-]+)\/)?([0-9a-zA-Z_-]+)(?::([0-9a-zA-Z_.-]+))?$

@@ -2,28 +2,38 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
 
-## [0.9.0] -- 2026-02-10
+## [0.9.0] -- 2026-02-11
+
+### Added
+- `OneLocker` class with context manager support (`with OneLocker(path) as locker:`)
 
 ### Changed
-- Migrated packaging from setup.py/setup.cfg to pyproject.toml with hatchling backend
-- Replaced black with ruff for linting and formatting
-- Updated GitHub Actions workflows to latest versions (checkout@v6, setup-python@v6)
-- Updated publish workflow to use `python -m build` instead of `setup.py sdist`
-- Modernized type hints: replaced `Optional`/`Union` with PEP 604 `X | None` / `X | Y` syntax
-- Converted remaining Sphinx-style docstrings to Google style
-- Dropped Python 3.9 support (minimum is now 3.10)
-- Added Python 3.14 support
+- Migrated to pyproject.toml/hatchling, ruff, latest GitHub Actions
+- Modernized type hints (PEP 604) and docstrings (Google style)
+- Dropped Python 3.9; added Python 3.14
+- `is_command_callable` uses `shutil.which()` instead of `os.system()`
+- `_create_lock` is now iterative with retry limit (was unbounded recursion)
+- `wait_for_lock` progress dots go to stderr instead of stdout
+- `convert_value` passes through `None`/`bool`/`int`/`float` directly
+- `is_url` regex compiled once at module level
 
 ### Fixed
-- Deduplicated `mkabs` in `file_locking.py` — `ThreeLocker` now uses the canonical version from `paths.py` which handles None, URLs, and file-as-reldir
-- Deduplicated `_create_lock` in `file_locking.py` — consolidated to single implementation in `files.py`
-- Fixed `tarfile.extractall()` deprecation warning for Python 3.12+ (added `filter="data"`)
-- Fixed typo "assiated" → "associated" in `cli_tools.py`
-- Re-exported `uniqify` function that was accidentally dropped during explicit-exports migration
+- Shell injection in `is_command_callable`
+- Signal handler leak in `read_lock`/`write_lock` context managers
+- ThreeLocker SIGTERM handler crash
+- `read_lock()`/`_lock()` returning True when locking actually fails
+- `read_unlock()` while write lock held now raises `RuntimeError`
+- `deep_update` crash replacing scalar with nested dict
+- `TmpEnv` destroying pre-existing env vars on exit
+- `arg_defaults(unique=True)` only returning first subcommand's defaults
+- `wait_max=0` treated as falsy in `create_read_lock`/`create_write_lock`
+- `is_writable` infinite recursion and failure on nested paths
+- Mutable default argument in `parse_registry_path`
+- `tarfile.extractall()` deprecation warning on Python 3.12+
 
 ### Removed
-- Deprecated `asciify_dict()` function (was a Python 2 no-op)
-- Legacy packaging files: setup.py, setup.cfg, MANIFEST.in, requirements/
+- `build_cli_extra()` and `asciify_dict()` functions
+- Legacy packaging files (setup.py, setup.cfg, MANIFEST.in, requirements/)
 
 ## [0.8.2] -- 2025-12-01
 

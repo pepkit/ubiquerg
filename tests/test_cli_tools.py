@@ -1,17 +1,10 @@
-"""Tests for rendering CLI options and arguments"""
+"""Tests for CLI tools"""
 
 import argparse
-from collections import OrderedDict
 
 import pytest
 
-from ubiquerg import VersionInHelpParser, build_cli_extra, convert_value, powerset
-
-
-def pytest_generate_tests(metafunc):
-    """Test case generation and parameterization for this module"""
-    if "ordwrap" in metafunc.fixturenames:
-        metafunc.parametrize("ordwrap", [tuple, OrderedDict])
+from ubiquerg import VersionInHelpParser, convert_value
 
 
 def build_parser():
@@ -244,36 +237,6 @@ def build_parser():
     return parser, msg_by_cmd
 
 
-@pytest.mark.parametrize(
-    ["optargs", "expected"],
-    [
-        (
-            [
-                ("-X", None),
-                ("--revert", 1),
-                ("-O", "outfile"),
-                ("--execute-locally", None),
-                ("-I", ["file1", "file2"]),
-            ],
-            "-X --revert 1 -O outfile --execute-locally -I file1 file2",
-        )
-    ],
-)
-def test_build_cli_extra(optargs, expected, ordwrap):
-    """Check that CLI optargs are rendered as expected."""
-    observed = build_cli_extra(ordwrap(optargs))
-    print("expected: {}".format(expected))
-    print("observed: {}".format(observed))
-    assert expected == observed
-
-
-@pytest.mark.parametrize("optargs", powerset([(None, "a"), (1, "one")], nonempty=True))
-def test_illegal_cli_extra_input_is_exceptional(optargs, ordwrap):
-    """Non-string keys are illegal and cause a TypeError."""
-    with pytest.raises(TypeError):
-        build_cli_extra(ordwrap(optargs))
-
-
 def test_dests_by_subparser_return_type():
     """Check if the return type is dict of lists keyed by subcommand name"""
     parser, msgs_by_cmd = build_parser()
@@ -341,8 +304,21 @@ def test_arg_defaults_unqiue():
     parser, _ = build_parser()
     tld = parser.arg_defaults(unique=True)
     assert isinstance(tld, dict)
-    assert len(tld) == 17
+    assert len(tld) == 19
     assert len(set(tld.keys())) == len(tld.keys())
+
+
+def test_arg_defaults_unique_includes_all_subcommands():
+    """unique=True must merge defaults from ALL subcommands, not just the first."""
+    parser = VersionInHelpParser(prog="test")
+    subs = parser.add_subparsers(dest="command")
+    sub1 = subs.add_parser("first")
+    sub1.add_argument("--only-in-first", default="val1")
+    sub2 = subs.add_parser("second")
+    sub2.add_argument("--only-in-second", default="val2")
+    result = parser.arg_defaults(unique=True)
+    assert "only_in_first" in result, f"Missing first subcommand defaults: {result}"
+    assert "only_in_second" in result, f"Missing second subcommand defaults: {result}"
 
 
 @pytest.mark.parametrize(

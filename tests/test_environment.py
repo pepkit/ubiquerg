@@ -56,6 +56,17 @@ def test_no_intersection(overwrite, envvars):
             assert v == os.getenv(k)
 
 
+def test_overwrite_restores_original_value():
+    """With overwrite=True, exiting the context should restore the original value, not delete it."""
+    os.environ["UBIQUERG_TEST_RESTORE"] = "original"
+    try:
+        with TmpEnv(overwrite=True, UBIQUERG_TEST_RESTORE="modified"):
+            assert os.environ["UBIQUERG_TEST_RESTORE"] == "modified"
+        assert os.environ.get("UBIQUERG_TEST_RESTORE") == "original"
+    finally:
+        os.environ.pop("UBIQUERG_TEST_RESTORE", None)
+
+
 def check_unset(envvars):
     """Verify that each environment variable is not set."""
     fails = [v for v in envvars if os.getenv(v) or v in os.environ]
