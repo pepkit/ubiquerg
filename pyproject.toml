@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ubiquerg"
-version = "0.9.0"
+version = "0.9.1-dev"
 description = "Various utility functions"
 readme = "README.md"
 license = "BSD-2-Clause"
