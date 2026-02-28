@@ -101,31 +101,40 @@ def filesize_to_str(size: int | float) -> str | int | float:
     return size
 
 
-def untar(src: str, dst: str) -> None:
+def untar(src: str, dst: str, **kwargs) -> None:
     """Unpack a path to a target folder.
 
-    All the required directories will be created.
+    All the required directories will be created. Additional keyword
+    arguments are passed through to tarfile.extractall().
 
-    Note: We intentionally use extractall() without filter="data" here.
-    Python 3.12+ (PEP 706) added filter="data" which hardens extraction
-    by rejecting absolute paths, path traversal, setuid bits, and absolute
-    symlinks. However, some refgenie server archives contain absolute
-    symlinks to parent assets (e.g., bwa_index symlinks to the fasta file
-    using the build server's absolute path). These are always broken on
-    the client, but filter="data" crashes on them with AbsoluteLinkError
-    instead of just extracting the broken symlink.
+    Tarfile filter background (PEP 706):
 
-    Until refgenie's archive creation is fixed to stop including absolute
-    symlinks, we use vanilla extractall. Once that's resolved, this should
-    switch to filter="data" (or a custom filter that skips absolute
-    symlinks) for the security hardening it provides.
+    Python 3.12 added a `filter` parameter to extractall() with three
+    options: "fully_trusted" (no restrictions), "tar" (some restrictions),
+    and "data" (strict: rejects absolute paths, symlinks to absolute
+    targets, etc.). In 3.12-3.13, the default is "fully_trusted" but
+    a DeprecationWarning is emitted if no filter is specified. In 3.14,
+    the default changed to "data".
+
+    This matters for refgenie because refgenie server archives contain
+    absolute symlinks (child assets like bwa_index symlink to parent
+    assets like fasta using the build server's absolute path). These
+    symlinks are always broken on the client anyway (the client rewrites
+    them), but the "data" filter crashes with AbsoluteLinkError before
+    extraction even finishes.
+
+    Callers extracting refgenie archives should pass
+    filter="fully_trusted" to allow these absolute symlinks through.
+    Once refgenie's archive creation stops including absolute symlinks,
+    callers should switch to filter="data" for security hardening.
 
     Args:
         src: path to unpack
         dst: path to output folder
+        **kwargs: passed to tarfile.extractall (e.g. filter="fully_trusted")
     """
     with topen(src) as tf:
-        tf.extractall(path=dst)
+        tf.extractall(path=dst, **kwargs)
 
 
 def _get_file_mod_time(pth: str) -> float:

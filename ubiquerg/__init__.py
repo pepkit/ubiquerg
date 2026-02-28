@@ -38,6 +38,7 @@ from .files import (
 )
 from .paths import expandpath, mkabs, parse_registry_path, parse_registry_path_strict
 from .system import is_command_callable, is_writable
+from .time import parse_timedelta
 from .web import has_scheme, is_url
 
 __all__ = [
@@ -62,6 +63,7 @@ __all__ = [
     "mkabs",
     "OneLocker",
     "parse_registry_path",
+    "parse_timedelta",
     "parse_registry_path_strict",
     "powerset",
     "query_yes_no",

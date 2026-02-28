@@ -34,6 +34,12 @@ class ThreeLocker(object):
     to prevent race conditions between read and write locks. It allows multiple
     simultaneous readers, as long as there is no writer.
     It creates lock files in the same directory as the file to be locked.
+
+    Warning:
+        These locks are NOT re-entrant. If a process already holds a lock on a
+        file and tries to acquire the same lock again, it will deadlock (wait
+        forever for itself to release the lock). Do not nest lock contexts on
+        the same file.
     """
 
     def __init__(self, filepath: str, wait_max: int = 10, strict_ro_locks: bool = False):
@@ -190,6 +196,19 @@ def read_lock(obj: object) -> object:
 
     Yields:
         object: the locked object
+
+    Warning:
+        Locks are NOT re-entrant. Do not nest lock contexts on the same file,
+        or the process will deadlock waiting for itself::
+
+            # WRONG - will deadlock:
+            with read_lock(cfg):
+                with read_lock(cfg):  # Deadlock!
+                    ...
+
+            # RIGHT - lock once at the top level:
+            with read_lock(cfg):
+                do_work(cfg)  # Pass already-locked object
     """
     if isinstance(obj, str):
         locker = ThreeLocker(obj)
@@ -235,6 +254,19 @@ def write_lock(obj: object) -> object:
 
     Yields:
         object: the locked object
+
+    Warning:
+        Locks are NOT re-entrant. Do not nest lock contexts on the same file,
+        or the process will deadlock waiting for itself::
+
+            # WRONG - will deadlock:
+            with write_lock(cfg):
+                with write_lock(cfg):  # Deadlock!
+                    cfg.write()
+
+            # RIGHT - lock once at the top level:
+            with write_lock(cfg):
+                do_work_and_write(cfg)  # Don't re-lock inside
     """
     if isinstance(obj, str):
         locker = ThreeLocker(obj)
