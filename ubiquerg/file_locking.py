@@ -299,7 +299,7 @@ def write_lock(obj: object) -> object:
                 pass
 
 
-def locked_read_file(filepath, create_file: bool = False) -> str:
+def locked_read_file(filepath: str, create_file: bool = False) -> str:
     """Read a file contents into memory after locking the file.
 
     This will prevent other ThreeLocker-protected processes from writing to the

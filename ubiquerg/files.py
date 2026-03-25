@@ -131,7 +131,7 @@ def untar(src: str, dst: str, **kwargs) -> None:
     Args:
         src: path to unpack
         dst: path to output folder
-        **kwargs: passed to tarfile.extractall (e.g. filter="fully_trusted")
+        **kwargs (Any): passed to tarfile.extractall (e.g. filter="fully_trusted")
     """
     with topen(src) as tf:
         tf.extractall(path=dst, **kwargs)
