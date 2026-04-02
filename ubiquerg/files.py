@@ -1,11 +1,11 @@
 """Functions facilitating file operations"""
 
 import errno
+import hashlib
 import logging
 import os
 import sys
 import time
-import hashlib
 from tarfile import open as topen
 from warnings import warn
 
