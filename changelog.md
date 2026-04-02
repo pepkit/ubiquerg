@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html) and [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format. 
 
+## [0.9.3] -- 2026-04-02
+
+### Changed
+- `checksum()` accepts an `algorithm` parameter (default: "md5") for flexible hash selection
+- `filesize_to_str()` accepts `decimals` and `space` parameters; default changed to 2 decimal places with space separator (e.g. "1.00 KB")
+
 ## [0.9.2] -- 2026-04-02
 
 ### Fixed
