@@ -2,6 +2,7 @@ import functools
 import glob
 import logging
 import os
+import threading
 from contextlib import contextmanager
 from signal import SIGINT, SIGTERM, getsignal, signal
 
@@ -218,18 +219,13 @@ def read_lock(obj: object) -> object:
         raise AttributeError(f"Cannot lock: {obj}.")
 
     # handle a premature Ctrl+C exit from this context manager
-    old_sigterm = None
-    old_sigint = None
-    try:
-        old_sigterm = getsignal(SIGTERM)
-        old_sigint = getsignal(SIGINT)
+    prev_sigterm = None
+    prev_sigint = None
+    if threading.current_thread() is threading.main_thread():
+        prev_sigterm = getsignal(SIGTERM)
+        prev_sigint = getsignal(SIGINT)
         signal(SIGTERM, locker._interrupt_handler)
         signal(SIGINT, locker._interrupt_handler)
-        # If this is run in a thread, the signal module is not available and raises an exception.
-        # ValueError: signal only works in main thread of the main interpreter
-        # That's fine; in this case, we don't need to handle signals anyway.
-    except ValueError as e:
-        _LOGGER.error(f"Failed to set interrupt handler: {e}")
 
     locker.read_lock()
 
@@ -237,10 +233,10 @@ def read_lock(obj: object) -> object:
         yield obj
     finally:
         locker.read_unlock()
-        if old_sigterm is not None:
+        if prev_sigterm is not None:
             try:
-                signal(SIGTERM, old_sigterm)
-                signal(SIGINT, old_sigint)
+                signal(SIGTERM, prev_sigterm)
+                signal(SIGINT, prev_sigint)
             except ValueError:
                 pass
 
@@ -276,30 +272,28 @@ def write_lock(obj: object) -> object:
         raise AttributeError(f"Cannot lock: {obj}.")
 
     # handle a premature Ctrl+C exit from this context manager
-    old_sigterm = None
-    old_sigint = None
-    try:
-        old_sigterm = getsignal(SIGTERM)
-        old_sigint = getsignal(SIGINT)
+    prev_sigterm = None
+    prev_sigint = None
+    if threading.current_thread() is threading.main_thread():
+        prev_sigterm = getsignal(SIGTERM)
+        prev_sigint = getsignal(SIGINT)
         signal(SIGTERM, locker._interrupt_handler)
         signal(SIGINT, locker._interrupt_handler)
-    except ValueError as e:
-        _LOGGER.error(f"Failed to set interrupt handler: {e}")
 
     locker.write_lock()
     try:
         yield obj
     finally:
         locker.write_unlock()
-        if old_sigterm is not None:
+        if prev_sigterm is not None:
             try:
-                signal(SIGTERM, old_sigterm)
-                signal(SIGINT, old_sigint)
+                signal(SIGTERM, prev_sigterm)
+                signal(SIGINT, prev_sigint)
             except ValueError:
                 pass
 
 
-def locked_read_file(filepath, create_file: bool = False) -> str:
+def locked_read_file(filepath: str, create_file: bool = False) -> str:
     """Read a file contents into memory after locking the file.
 
     This will prevent other ThreeLocker-protected processes from writing to the
