@@ -1,11 +1,11 @@
 """Functions facilitating file operations"""
 
 import errno
+import hashlib
 import logging
 import os
 import sys
 import time
-from hashlib import md5
 from tarfile import open as topen
 from warnings import warn
 
@@ -27,17 +27,18 @@ FILE_SIZE_UNITS = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
 LOCK_PREFIX = "lock."
 
 
-def checksum(path: str, blocksize: int = int(2e9)) -> str:
-    """Generate a md5 checksum for the file contents in the provided path.
+def checksum(path: str, blocksize: int = int(2e9), algorithm: str = "md5") -> str:
+    """Generate a checksum for the file contents in the provided path.
 
     Args:
         path: path to file for which to generate checksum
         blocksize: number of bytes to read per iteration, default: 2GB
+        algorithm: hash algorithm name (e.g. "md5", "sha256"), default: "md5"
 
     Returns:
         str: checksum hash
     """
-    m = md5(usedforsecurity=False)
+    m = hashlib.new(algorithm, usedforsecurity=False)
     with open(path, "rb") as f:
         while True:
             buf = f.read(blocksize)
@@ -83,19 +84,22 @@ def size(path: str | list[str], size_str: bool = True) -> int | str | None:
     return filesize_to_str(s) if size_str and s is not None else s
 
 
-def filesize_to_str(size: int | float) -> str | int | float:
+def filesize_to_str(size: int | float, decimals: int = 2, space: bool = True) -> str | int | float:
     """Convert the numeric bytes to the size string.
 
     Args:
         size: file size to convert
+        decimals: number of decimal places, default: 2
+        space: whether to include a space before the unit, default: True
 
     Returns:
         str: file size string
     """
     if isinstance(size, (int, float)):
+        sep = " " if space else ""
         for unit in FILE_SIZE_UNITS:
             if size < 1024:
-                return "{}{}".format(round(size, 1), unit)
+                return f"{size:.{decimals}f}{sep}{unit}"
             size /= 1024
     warn("size argument was neither an int nor a float, returning the original object")
     return size
